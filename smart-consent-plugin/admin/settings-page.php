@@ -1,77 +1,107 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
-}
 
-add_action( 'admin_menu', 'scp_add_settings_page' );
+if (!defined('ABSPATH')) exit;
 
-function scp_add_settings_page() {
-    add_options_page(
-        __( 'Smart Consent Settings', 'smart-consent-plugin' ),
-        __( 'Smart Consent', 'smart-consent-plugin' ),
+// Añadir menú
+add_action('admin_menu', function() {
+    add_menu_page(
+        'Smart Consent',
+        'Smart Consent',
         'manage_options',
-        'smart-consent-plugin',
-        'scp_render_settings_page'
+        'smart-consent',
+        'smart_consent_settings_page',
+        'dashicons-shield'
     );
-}
+});
 
-add_action( 'admin_init', 'scp_register_settings' );
-
-function scp_register_settings() {
-    register_setting( 'scp_settings_group', 'scp_banner_title',   array( 'sanitize_callback' => 'sanitize_text_field' ) );
-    register_setting( 'scp_settings_group', 'scp_banner_message', array( 'sanitize_callback' => 'sanitize_textarea_field' ) );
-    register_setting( 'scp_settings_group', 'scp_accept_label',   array( 'sanitize_callback' => 'sanitize_text_field' ) );
-    register_setting( 'scp_settings_group', 'scp_reject_label',   array( 'sanitize_callback' => 'sanitize_text_field' ) );
-    register_setting( 'scp_settings_group', 'scp_expiry_days',    array( 'sanitize_callback' => 'absint' ) );
-
-    add_settings_section( 'scp_main_section', __( 'Banner Settings', 'smart-consent-plugin' ), '__return_false', 'smart-consent-plugin' );
-
-    add_settings_field( 'scp_banner_title',   __( 'Banner Title', 'smart-consent-plugin' ),   'scp_field_banner_title',   'smart-consent-plugin', 'scp_main_section' );
-    add_settings_field( 'scp_banner_message', __( 'Banner Message', 'smart-consent-plugin' ), 'scp_field_banner_message', 'smart-consent-plugin', 'scp_main_section' );
-    add_settings_field( 'scp_accept_label',   __( 'Accept Button Label', 'smart-consent-plugin' ), 'scp_field_accept_label', 'smart-consent-plugin', 'scp_main_section' );
-    add_settings_field( 'scp_reject_label',   __( 'Reject Button Label', 'smart-consent-plugin' ), 'scp_field_reject_label', 'smart-consent-plugin', 'scp_main_section' );
-    add_settings_field( 'scp_expiry_days',    __( 'Cookie Expiry (days)', 'smart-consent-plugin' ), 'scp_field_expiry_days', 'smart-consent-plugin', 'scp_main_section' );
-}
-
-function scp_field_banner_title() {
-    $value = esc_attr( get_option( 'scp_banner_title', '' ) );
-    echo '<input type="text" name="scp_banner_title" value="' . $value . '" class="regular-text" />';
-}
-
-function scp_field_banner_message() {
-    $value = esc_textarea( get_option( 'scp_banner_message', '' ) );
-    echo '<textarea name="scp_banner_message" rows="4" class="large-text">' . $value . '</textarea>';
-}
-
-function scp_field_accept_label() {
-    $value = esc_attr( get_option( 'scp_accept_label', 'Accept All' ) );
-    echo '<input type="text" name="scp_accept_label" value="' . $value . '" class="regular-text" />';
-}
-
-function scp_field_reject_label() {
-    $value = esc_attr( get_option( 'scp_reject_label', 'Reject All' ) );
-    echo '<input type="text" name="scp_reject_label" value="' . $value . '" class="regular-text" />';
-}
-
-function scp_field_expiry_days() {
-    $value = (int) get_option( 'scp_expiry_days', 180 );
-    echo '<input type="number" name="scp_expiry_days" value="' . $value . '" min="1" max="365" class="small-text" />';
-}
-
-function scp_render_settings_page() {
-    if ( ! current_user_can( 'manage_options' ) ) {
-        return;
-    }
+function smart_consent_settings_page() {
     ?>
     <div class="wrap">
-        <h1><?php esc_html_e( 'Smart Consent Plugin Settings', 'smart-consent-plugin' ); ?></h1>
+        <h1>Smart Consent Settings</h1>
+
         <form method="post" action="options.php">
             <?php
-            settings_fields( 'scp_settings_group' );
-            do_settings_sections( 'smart-consent-plugin' );
+            settings_fields('smart_consent_group');
+            do_settings_sections('smart-consent');
             submit_button();
             ?>
         </form>
     </div>
     <?php
 }
+add_action('admin_init', function() {
+
+    register_setting('smart_consent_group', 'smart_ga_id');
+    register_setting('smart_consent_group', 'smart_enable_analytics');
+    register_setting('smart_consent_group', 'smart_enable_ads');
+    register_setting('smart_consent_group', 'smart_banner_text');
+    register_setting('smart_consent_group', 'smart_debug_mode');
+
+});
+
+add_action('admin_init', function() {
+
+    add_settings_section(
+        'smart_main_section',
+        'Configuración General',
+        null,
+        'smart-consent'
+    );
+
+    add_settings_field(
+        'smart_ga_id',
+        'Google ID (GA4 o GTM)',
+        function() {
+            $value = get_option('smart_ga_id');
+            echo "<input type='text' name='smart_ga_id' value='$value' />";
+        },
+        'smart-consent',
+        'smart_main_section'
+    );
+
+    add_settings_field(
+        'smart_enable_analytics',
+        'Activar Analytics',
+        function() {
+            $value = get_option('smart_enable_analytics');
+            echo "<input type='checkbox' name='smart_enable_analytics' value='1' " . checked(1, $value, false) . " />";
+        },
+        'smart-consent',
+        'smart_main_section'
+    );
+
+    add_settings_field(
+        'smart_enable_ads',
+        'Activar Ads',
+        function() {
+            $value = get_option('smart_enable_ads');
+            echo "<input type='checkbox' name='smart_enable_ads' value='1' " . checked(1, $value, false) . " />";
+        },
+        'smart-consent',
+        'smart_main_section'
+    );
+
+    add_settings_field(
+        'smart_banner_text',
+        'Texto del banner',
+        function() {
+            $value = get_option('smart_banner_text');
+            echo "<textarea name='smart_banner_text'>$value</textarea>";
+        },
+        'smart-consent',
+        'smart_main_section'
+    );
+
+    add_settings_field(
+        'smart_debug_mode',
+        'Modo debug',
+        function() {
+            $value = get_option('smart_debug_mode');
+            echo "<input type='checkbox' name='smart_debug_mode' value='1' " . checked(1, $value, false) . " />";
+        },
+        'smart-consent',
+        'smart_main_section'
+    );
+
+});
+

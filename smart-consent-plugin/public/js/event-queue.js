@@ -1,49 +1,21 @@
-/**
- * Smart Consent Plugin - Event Queue
- * Queues and dispatches consent-related events to registered listeners.
- */
-(function (window) {
-    'use strict';
+// La cola se mantiene solo en memoria durante la sesión actual.
+// Si el usuario no acepta, los eventos se descartan limpiamente.
+window.consentEventQueue = [];
 
-    var ScpEventQueue = {
-        _queue: [],
-        _listeners: {},
+function trackEvent(name, data) {
 
-        on: function (eventName, callback) {
-            if (!this._listeners[eventName]) {
-                this._listeners[eventName] = [];
-            }
-            this._listeners[eventName].push(callback);
-        },
+  if (!window.userConsented) {
+    consentEventQueue.push({name, data});
+  } else {
+    gtag('event', name, data);
+  }
+}
 
-        off: function (eventName, callback) {
-            if (!this._listeners[eventName]) return;
-            this._listeners[eventName] = this._listeners[eventName].filter(function (cb) {
-                return cb !== callback;
-            });
-        },
+// Vaciar cola (se llama tras loadGoogle, cuando GA ya está listo)
+function flushEvents() {
+  consentEventQueue.forEach(function(e) {
+    gtag('event', e.name, e.data);
+  });
 
-        emit: function (eventName, data) {
-            this._queue.push({ event: eventName, data: data, timestamp: Date.now() });
-            this._dispatch(eventName, data);
-        },
-
-        _dispatch: function (eventName, data) {
-            var callbacks = this._listeners[eventName] || [];
-            callbacks.forEach(function (cb) {
-                try {
-                    cb(data);
-                } catch (e) {
-                    console.error('[SCP EventQueue] Error in listener for "' + eventName + '":', e);
-                }
-            });
-        },
-
-        getHistory: function () {
-            return this._queue.slice();
-        }
-    };
-
-    window.ScpEventQueue = ScpEventQueue;
-
-})(window);
+  consentEventQueue = [];
+}

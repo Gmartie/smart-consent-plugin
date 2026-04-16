@@ -1,120 +1,122 @@
-/**
- * Smart Consent Plugin - Consent Core
- * Manages banner display, user choices, and server-side persistence via AJAX.
- */
-(function (window, document) {
-    'use strict';
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
 
-    var ScpConsent = {
+// Leer consentimiento previo
+function getConsent() {
+  return document.cookie.includes('smart_consent=accepted');
+}
 
-        config: window.scpData || {},
+// Estado inicial
+window.userConsented = getConsent();
 
-        init: function () {
-            ScpIntegrations.init();
+// Consent Mode por defecto bloqueado
+gtag('consent', 'default', {
+  ad_storage: 'denied',
+  analytics_storage: 'denied',
+  ad_user_data: 'denied',
+  ad_personalization: 'denied'
+});
 
-            if (this._getStoredConsent()) {
-                this._applyStoredConsent();
-                return;
-            }
+// Debug
+if (smartSettings.debug) {
+  console.log("Smart Consent activo");
+  console.log("Configuración:", smartSettings);
+}
 
-            this._showBanner();
-        },
+// FIX #9: Incluir nonce en la petición AJAX
+function saveConsent(consent) {
+  fetch(smartSettings.ajax_url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: `action=save_consent&consent=${consent}&nonce=${smartSettings.nonce}`
+  });
+}
 
-        _getStoredConsent: function () {
-            var name = 'scp_consent=';
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var c = cookies[i].trim();
-                if (c.indexOf(name) === 0) {
-                    try {
-                        return JSON.parse(decodeURIComponent(c.substring(name.length)));
-                    } catch (e) {
-                        return null;
-                    }
-                }
-            }
-            return null;
-        },
+// garantizando que gtag esté listo antes de enviar los eventos encolados.
+function loadGoogle(onReady) {
+  if (smartSettings.analytics && smartSettings.ga_id) {
 
-        _applyStoredConsent: function () {
-            var stored = this._getStoredConsent();
-            if (stored && stored.accepted) {
-                ScpEventQueue.emit('consent:accepted', stored);
-            } else {
-                ScpEventQueue.emit('consent:rejected', stored);
-            }
-        },
+    let script = document.createElement('script');
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${smartSettings.ga_id}`;
+    script.async = true;
 
-        _showBanner: function () {
-            var banner = document.getElementById('scp-consent-banner');
-            if (banner) {
-                banner.style.display = 'block';
-                banner.setAttribute('aria-hidden', 'false');
-            }
-        },
+    script.onload = function() {
+      gtag('js', new Date());
+      gtag('config', smartSettings.ga_id);
 
-        _hideBanner: function () {
-            var banner = document.getElementById('scp-consent-banner');
-            if (banner) {
-                banner.style.display = 'none';
-                banner.setAttribute('aria-hidden', 'true');
-            }
-        },
+      if (smartSettings.debug) {
+        console.log("Google Analytics cargado");
+      }
 
-        accept: function () {
-            var consentData = {
-                accepted: true,
-                timestamp: new Date().toISOString(),
-                categories: { analytics: true, marketing: true, preferences: true }
-            };
-            this._saveConsent(consentData);
-            ScpEventQueue.emit('consent:accepted', consentData);
-            this._hideBanner();
-        },
-
-        reject: function () {
-            var consentData = {
-                accepted: false,
-                timestamp: new Date().toISOString(),
-                categories: { analytics: false, marketing: false, preferences: false }
-            };
-            this._saveConsent(consentData);
-            ScpEventQueue.emit('consent:rejected', consentData);
-            this._hideBanner();
-        },
-
-        _saveConsent: function (consentData) {
-            var self = this;
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', self.config.ajaxUrl, true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    ScpEventQueue.emit('consent:saved', consentData);
-                }
-            };
-            xhr.send(
-                'action=scp_save_consent' +
-                '&nonce=' + encodeURIComponent(self.config.nonce) +
-                '&consent=' + encodeURIComponent(JSON.stringify(consentData))
-            );
-        }
+      if (typeof onReady === 'function') {
+        onReady(); // flushEvents se ejecuta aquí, tras la carga de GA
+      }
     };
 
-    document.addEventListener('DOMContentLoaded', function () {
-        ScpConsent.init();
+    document.head.appendChild(script);
+  }
+}
 
-        var acceptBtn = document.getElementById('scp-accept-btn');
-        var rejectBtn = document.getElementById('scp-reject-btn');
+// DOM listo
+document.addEventListener('DOMContentLoaded', function() {
 
-        if (acceptBtn) {
-            acceptBtn.addEventListener('click', function () { ScpConsent.accept(); });
-        }
-        if (rejectBtn) {
-            rejectBtn.addEventListener('click', function () { ScpConsent.reject(); });
-        }
+  const acceptBtn = document.getElementById('accept-cookies');
+  const rejectBtn = document.getElementById('reject-cookies');
+
+  const banner = document.getElementById('scp-consent-banner');
+
+  if (window.userConsented) {
+    if (banner) banner.style.display = 'none';
+
+    gtag('consent', 'update', {
+      ad_storage: 'granted',
+      analytics_storage: 'granted',
+      ad_user_data: 'granted',
+      ad_personalization: 'granted'
     });
 
-    window.ScpConsent = ScpConsent;
+    loadGoogle(function() {
+      flushEvents();
+    });
 
-})(window, document);
+  } else {
+    // Mostrar banner si no hay consentimiento previo
+    if (banner) banner.style.display = 'block';
+  }
+
+  // Botón aceptar
+  if (acceptBtn) {
+    acceptBtn.addEventListener('click', function() {
+
+      window.userConsented = true;
+
+      saveConsent('accepted');
+
+      gtag('consent', 'update', {
+        ad_storage: 'granted',
+        analytics_storage: 'granted',
+        ad_user_data: 'granted',
+        ad_personalization: 'granted'
+      });
+
+      loadGoogle(function() {
+        flushEvents();
+      });
+
+      if (banner) banner.style.display = 'none';
+    });
+  }
+
+  // Botón rechazar
+  if (rejectBtn) {
+    rejectBtn.addEventListener('click', function() {
+
+      saveConsent('rejected');
+
+      if (banner) banner.style.display = 'none';
+    });
+  }
+
+});

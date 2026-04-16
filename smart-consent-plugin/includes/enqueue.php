@@ -1,47 +1,36 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
-}
-
-add_action( 'wp_enqueue_scripts', 'scp_enqueue_assets' );
-
-function scp_enqueue_assets() {
-    wp_enqueue_style(
-        'scp-banner',
-        SCP_PLUGIN_URL . 'public/css/banner.css',
-        array(),
-        SCP_VERSION
-    );
+add_action('wp_enqueue_scripts', function() {
 
     wp_enqueue_script(
-        'scp-event-queue',
-        SCP_PLUGIN_URL . 'public/js/event-queue.js',
-        array(),
-        SCP_VERSION,
+        'smart-consent-core',
+        plugin_dir_url(__FILE__) . '../public/js/consent-core.js',
+        [],
+        '1.0',
         true
     );
 
     wp_enqueue_script(
-        'scp-integrations',
-        SCP_PLUGIN_URL . 'public/js/integrations.js',
-        array( 'scp-event-queue' ),
-        SCP_VERSION,
+        'event-queue',
+        plugin_dir_url(__FILE__) . '../public/js/event-queue.js',
+        ['smart-consent-core'], // depende de consent-core (donde está gtag)
+        '1.0',
         true
     );
 
     wp_enqueue_script(
-        'scp-consent-core',
-        SCP_PLUGIN_URL . 'public/js/consent-core.js',
-        array( 'scp-event-queue', 'scp-integrations' ),
-        SCP_VERSION,
+        'smart-integrations',
+        plugin_dir_url(__FILE__) . '../public/js/integrations.js',
+        ['smart-consent-core', 'event-queue'], // depende de trackEvent definido en event-queue
+        '1.0',
         true
     );
 
-    wp_localize_script( 'scp-consent-core', 'scpData', array(
-        'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
-        'nonce'       => wp_create_nonce( 'scp_nonce' ),
-        'expiryDays'  => (int) get_option( 'scp_expiry_days', 180 ),
-        'acceptLabel' => esc_html( get_option( 'scp_accept_label', 'Accept All' ) ),
-        'rejectLabel' => esc_html( get_option( 'scp_reject_label', 'Reject All' ) ),
-    ) );
-}
+    wp_localize_script('smart-consent-core', 'smartSettings', [
+        'ajax_url'  => admin_url('admin-ajax.php'),
+        'nonce'     => wp_create_nonce('smart_consent_nonce'),
+        'ga_id'     => get_option('smart_ga_id'),
+        'analytics' => get_option('smart_enable_analytics'),
+        'ads'       => get_option('smart_enable_ads'),
+        'debug'     => get_option('smart_debug_mode'),
+    ]);
+});

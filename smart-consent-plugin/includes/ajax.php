@@ -1,40 +1,31 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
-}
 
-add_action( 'wp_ajax_scp_save_consent',        'scp_ajax_save_consent' );
-add_action( 'wp_ajax_nopriv_scp_save_consent', 'scp_ajax_save_consent' );
+if (!defined('ABSPATH')) exit;
 
-function scp_ajax_save_consent() {
-    check_ajax_referer( 'scp_nonce', 'nonce' );
+// Guardar consentimiento
+add_action('wp_ajax_save_consent', 'smart_save_consent');
+add_action('wp_ajax_nopriv_save_consent', 'smart_save_consent');
 
-    $consent_value = isset( $_POST['consent'] ) ? sanitize_text_field( wp_unslash( $_POST['consent'] ) ) : '';
+function smart_save_consent() {
 
-    if ( empty( $consent_value ) ) {
-        wp_send_json_error( array( 'message' => 'Invalid consent data.' ) );
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'smart_consent_nonce')) {
+        wp_send_json_error(['message' => 'Nonce inválido'], 403);
+        return;
     }
 
-    $expiry = (int) get_option( 'scp_expiry_days', 180 );
+    $consent = isset($_POST['consent']) ? sanitize_text_field($_POST['consent']) : 'unknown';
 
-    setcookie(
-        'scp_consent',
-        $consent_value,
-        time() + ( DAY_IN_SECONDS * $expiry ),
-        COOKIEPATH,
-        COOKIE_DOMAIN,
-        is_ssl(),
-        true
-    );
+    // Guardar en cookie
+    setcookie('smart_consent', $consent, time() + (86400 * 30), "/");
 
-    wp_send_json_success( array( 'message' => 'Consent saved.' ) );
-}
+    // (guardar en base de datos):
+    // global $wpdb;
+    // $wpdb->insert('wp_consent_logs', [
+    //     'consent' => $consent,
+    //     'created_at' => current_time('mysql')
+    // ]);
 
-add_action( 'wp_ajax_scp_revoke_consent',        'scp_ajax_revoke_consent' );
-add_action( 'wp_ajax_nopriv_scp_revoke_consent', 'scp_ajax_revoke_consent' );
-
-function scp_ajax_revoke_consent() {
-    check_ajax_referer( 'scp_nonce', 'nonce' );
-    setcookie( 'scp_consent', '', time() - 3600, COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true );
-    wp_send_json_success( array( 'message' => 'Consent revoked.' ) );
+    wp_send_json_success([
+        'message' => 'Consentimiento guardado'
+    ]);
 }
