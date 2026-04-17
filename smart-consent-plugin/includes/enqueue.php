@@ -30,7 +30,6 @@ add_action('wp_enqueue_scripts', function() {
         'nonce'     => wp_create_nonce('smart_consent_nonce'),
         'ga_id'     => get_option('smart_ga_id'),
         'analytics' => get_option('smart_enable_analytics'),
-        'ads'       => get_option('smart_enable_ads'),
         'debug'     => get_option('smart_debug_mode'),
     ]);
 });

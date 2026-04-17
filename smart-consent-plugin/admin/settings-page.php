@@ -33,7 +33,6 @@ add_action('admin_init', function() {
 
     register_setting('smart_consent_group', 'smart_ga_id');
     register_setting('smart_consent_group', 'smart_enable_analytics');
-    register_setting('smart_consent_group', 'smart_enable_ads');
     register_setting('smart_consent_group', 'smart_banner_text');
     register_setting('smart_consent_group', 'smart_debug_mode');
 
@@ -65,17 +64,6 @@ add_action('admin_init', function() {
         function() {
             $value = get_option('smart_enable_analytics');
             echo "<input type='checkbox' name='smart_enable_analytics' value='1' " . checked(1, $value, false) . " />";
-        },
-        'smart-consent',
-        'smart_main_section'
-    );
-
-    add_settings_field(
-        'smart_enable_ads',
-        'Activar Ads',
-        function() {
-            $value = get_option('smart_enable_ads');
-            echo "<input type='checkbox' name='smart_enable_ads' value='1' " . checked(1, $value, false) . " />";
         },
         'smart-consent',
         'smart_main_section'

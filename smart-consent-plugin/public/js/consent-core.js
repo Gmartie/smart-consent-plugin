@@ -11,10 +11,7 @@ window.userConsented = getConsent();
 
 // Consent Mode por defecto bloqueado
 gtag('consent', 'default', {
-  ad_storage: 'denied',
   analytics_storage: 'denied',
-  ad_user_data: 'denied',
-  ad_personalization: 'denied'
 });
 
 // Debug
@@ -23,7 +20,6 @@ if (smartSettings.debug) {
   console.log("Configuración:", smartSettings);
 }
 
-// FIX #9: Incluir nonce en la petición AJAX
 function saveConsent(consent) {
   fetch(smartSettings.ajax_url, {
     method: 'POST',
@@ -44,7 +40,9 @@ function loadGoogle(onReady) {
 
     script.onload = function() {
       gtag('js', new Date());
-      gtag('config', smartSettings.ga_id);
+      gtag('config', smartSettings.ga_id, { //MODO DEBUG, ELIMINAR EN PRODUCCIÓN
+     debug_mode: true
+    });
 
       if (smartSettings.debug) {
         console.log("Google Analytics cargado");
@@ -71,10 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (banner) banner.style.display = 'none';
 
     gtag('consent', 'update', {
-      ad_storage: 'granted',
       analytics_storage: 'granted',
-      ad_user_data: 'granted',
-      ad_personalization: 'granted'
     });
 
     loadGoogle(function() {
@@ -95,11 +90,8 @@ document.addEventListener('DOMContentLoaded', function() {
       saveConsent('accepted');
 
       gtag('consent', 'update', {
-        ad_storage: 'granted',
-        analytics_storage: 'granted',
-        ad_user_data: 'granted',
-        ad_personalization: 'granted'
-      });
+          analytics_storage: 'granted',
+          });
 
       loadGoogle(function() {
         flushEvents();
