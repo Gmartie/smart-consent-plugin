@@ -1,114 +1,72 @@
+
+
+// dataLayer ya está declarado en <head> por enqueue.php (antes de GTM)
+// Solo nos aseguramos de que no sobreescribe
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 
-// Leer consentimiento previo
-function getConsent() {
-  return document.cookie.includes('smart_consent=accepted');
-}
+// Leer estado de consentimiento desde la variable inyectada por PHP
+window.userConsented = (smartSettings.consented === 'true');
 
-// Estado inicial
-window.userConsented = getConsent();
-
-// Consent Mode por defecto bloqueado
-gtag('consent', 'default', {
-  analytics_storage: 'denied',
-});
-
-// Debug
 if (smartSettings.debug) {
-  console.log("Smart Consent activo");
-  console.log("Configuración:", smartSettings);
+    console.log('[SmartConsent] Iniciado. Consentimiento previo:', window.userConsented);
 }
 
 function saveConsent(consent) {
-  fetch(smartSettings.ajax_url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: `action=save_consent&consent=${consent}&nonce=${smartSettings.nonce}`
-  });
-}
-
-// garantizando que gtag esté listo antes de enviar los eventos encolados.
-function loadGoogle(onReady) {
-  if (smartSettings.analytics && smartSettings.ga_id) {
-
-    let script = document.createElement('script');
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${smartSettings.ga_id}`;
-    script.async = true;
-
-    script.onload = function() {
-      gtag('js', new Date());
-      gtag('config', smartSettings.ga_id, { //MODO DEBUG, ELIMINAR EN PRODUCCIÓN
-     debug_mode: true
+    fetch(smartSettings.ajax_url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `action=save_consent&consent=${consent}&nonce=${smartSettings.nonce}`
     });
-
-      if (smartSettings.debug) {
-        console.log("Google Analytics cargado");
-      }
-
-      if (typeof onReady === 'function') {
-        onReady(); // flushEvents se ejecuta aquí, tras la carga de GA
-      }
-    };
-
-    document.head.appendChild(script);
-  }
 }
 
-// DOM listo
 document.addEventListener('DOMContentLoaded', function() {
 
-  const acceptBtn = document.getElementById('accept-cookies');
-  const rejectBtn = document.getElementById('reject-cookies');
+    const banner = document.getElementById('scp-consent-banner');
+    const acceptBtn = document.getElementById('accept-cookies');
+    const rejectBtn = document.getElementById('reject-cookies');
 
-  const banner = document.getElementById('scp-consent-banner');
+    if (window.userConsented) {
+        // Ya tenía consentimiento: ocultar banner
+        if (banner) banner.style.display = 'none';
+        // El update de consentimiento ya se hizo en <head> por PHP,
+        // así que GTM ya habrá disparado GA4.
+        if (smartSettings.debug) console.log('[SmartConsent] Usuario ya había aceptado. GTM gestionará GA4.');
 
-  if (window.userConsented) {
-    if (banner) banner.style.display = 'none';
+    } else {
+        if (banner) banner.style.display = 'block';
+    }
 
-    gtag('consent', 'update', {
-      analytics_storage: 'granted',
-    });
+    if (acceptBtn) {
+        acceptBtn.addEventListener('click', function() {
+            window.userConsented = true;
+            saveConsent('accepted');
 
-    loadGoogle(function() {
-      flushEvents();
-    });
+            // Notificamos a GTM que el usuario ha aceptado.
+            // GTM disparará automáticamente todas las etiquetas pendientes
+            // (GA4, Ads, etc.) que tienen como condición analytics_storage=granted.
+            gtag('consent', 'update', {
+                'ad_storage':         'granted',
+                'analytics_storage':  'granted',
+                'ad_user_data':       'granted',
+                'ad_personalization': 'granted'
+            });
 
-  } else {
-    // Mostrar banner si no hay consentimiento previo
-    if (banner) banner.style.display = 'block';
-  }
+            // Vaciar la cola de eventos acumulados mientras no había consentimiento
+            flushEvents();
 
-  // Botón aceptar
-  if (acceptBtn) {
-    acceptBtn.addEventListener('click', function() {
+            if (banner) banner.style.display = 'none';
 
-      window.userConsented = true;
+            if (smartSettings.debug) console.log('[SmartConsent] Aceptado. GTM ha recibido consent update.');
+        });
+    }
 
-      saveConsent('accepted');
-
-      gtag('consent', 'update', {
-          analytics_storage: 'granted',
-          });
-
-      loadGoogle(function() {
-        flushEvents();
-      });
-
-      if (banner) banner.style.display = 'none';
-    });
-  }
-
-  // Botón rechazar
-  if (rejectBtn) {
-    rejectBtn.addEventListener('click', function() {
-
-      saveConsent('rejected');
-
-      if (banner) banner.style.display = 'none';
-    });
-  }
-
+    if (rejectBtn) {
+        rejectBtn.addEventListener('click', function() {
+            window.userConsented = false;
+            saveConsent('rejected');
+            if (banner) banner.style.display = 'none';
+            if (smartSettings.debug) console.log('[SmartConsent] Rechazado. GA4 no se disparará.');
+        });
+    }
 });

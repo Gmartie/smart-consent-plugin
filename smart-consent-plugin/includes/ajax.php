@@ -2,7 +2,6 @@
 
 if (!defined('ABSPATH')) exit;
 
-// Guardar consentimiento
 add_action('wp_ajax_save_consent', 'smart_save_consent');
 add_action('wp_ajax_nopriv_save_consent', 'smart_save_consent');
 
@@ -15,15 +14,8 @@ function smart_save_consent() {
 
     $consent = isset($_POST['consent']) ? sanitize_text_field($_POST['consent']) : 'unknown';
 
-    // Guardar en cookie
+    // Guardar en cookie (30 días)
     setcookie('smart_consent', $consent, time() + (86400 * 30), "/");
-
-    // (guardar en base de datos):
-    // global $wpdb;
-    // $wpdb->insert('wp_consent_logs', [
-    //     'consent' => $consent,
-    //     'created_at' => current_time('mysql')
-    // ]);
 
     wp_send_json_success([
         'message' => 'Consentimiento guardado'
