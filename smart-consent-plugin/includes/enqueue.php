@@ -1,12 +1,4 @@
 <?php
-/**
- * CORRECCIÓN CLAVE #1:
- * El "consent default" debe enviarse al dataLayer ANTES de que GTM cargue.
- * Por eso usamos wp_head con prioridad 1 (muy alta) para que se ejecute
- * antes que el snippet de GTM que GTM4WP inyecta en prioridad normal.
- *
- * Si este bloque llegara después de GTM, Google lo ignoraría por completo.
- */
 add_action('wp_head', function() {
     $consented = isset($_COOKIE['smart_consent']) && $_COOKIE['smart_consent'] === 'accepted';
     ?>
@@ -40,13 +32,7 @@ add_action('wp_head', function() {
 }, 1); // Prioridad 1 = se ejecuta antes que casi todo lo demás en <head>
 
 
-/**
- * CORRECCIÓN CLAVE #2:
- * Los scripts del banner y la lógica de consentimiento van al FOOTER,
- * lo cual está bien para la UI. Pero ya NO cargan GA4 directamente.
- * GA4 ahora vive dentro de GTM como etiqueta, y GTM decide cuándo
- * dispararlo según el estado del consentimiento.
- */
+
 add_action('wp_enqueue_scripts', function() {
 
     wp_enqueue_script(
@@ -80,12 +66,33 @@ add_action('wp_enqueue_scripts', function() {
         '2.0'
     );
 
-    // Pasamos ajustes al JS. Ya no se pasa ga_id porque GA4
-    // lo gestiona GTM internamente, no este plugin.
+    // Detectar login reciente: WooCommerce establece una cookie temporal
+    // 'woocommerce_just_logged_in' justo después del login.
+    $just_logged_in = false;
+    if ( is_user_logged_in() && isset($_COOKIE['woocommerce_just_logged_in']) ) {
+        $just_logged_in = true;
+        // Eliminamos la cookie para que no se dispare en la siguiente página
+        setcookie('woocommerce_just_logged_in', '', time() - 3600, COOKIEPATH, COOKIE_DOMAIN);
+    }
+
+    // Detectar registro reciente: WooCommerce añade el parámetro
+    // 'account-registered' en la URL al redirigir tras el registro.
+    $just_registered = isset($_GET['account-registered']) || isset($_GET['registered']);
+
     wp_localize_script('smart-consent-core', 'smartSettings', [
-        'ajax_url' => admin_url('admin-ajax.php'),
-        'nonce'    => wp_create_nonce('smart_consent_nonce'),
-        'debug'    => get_option('smart_debug_mode'),
-        'consented'=> isset($_COOKIE['smart_consent']) && $_COOKIE['smart_consent'] === 'accepted' ? 'true' : 'false',
+        'ajax_url'        => admin_url('admin-ajax.php'),
+        'nonce'           => wp_create_nonce('smart_consent_nonce'),
+        'debug'           => get_option('smart_debug_mode'),
+        'consented'       => isset($_COOKIE['smart_consent']) && $_COOKIE['smart_consent'] === 'accepted' ? 'true' : 'false',
+        'justLoggedIn'    => $just_logged_in    ? 'true' : 'false',
+        'justRegistered'  => $just_registered   ? 'true' : 'false',
     ]);
 });
+
+/**
+ * Establecer cookie de login cuando WooCommerce procesa el inicio de sesión.
+ * Se engancha a 'woocommerce_login' que se dispara justo después de autenticar
+ * al usuario, antes de la redirección*/
+add_action('woocommerce_login', function() {
+    setcookie('woocommerce_just_logged_in', '1', time() + 60, COOKIEPATH, COOKIE_DOMAIN);
+}, 10, 2);

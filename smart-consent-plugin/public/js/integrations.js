@@ -1,4 +1,3 @@
-
 // EVENTO: view_item_list
 // Se dispara al cargar una página de categoría, tienda o listado de productos.
 // Registra todos los productos visibles en el listado.
@@ -33,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // EVENTO: add_to_cart
-// 1. Producto simple en listado (clic en ".add_to_cart_button")
+// 1. Producto simple en listado
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('add_to_cart_button')) {
         const price       = parseFloat(e.target.dataset.price) || 0;
@@ -49,7 +48,7 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// 2. Producto variable (y simple) en página de detalle
+// 2. Producto variable en página de detalle
 document.addEventListener('DOMContentLoaded', function() {
     const addBtn = document.querySelector('button.single_add_to_cart_button');
     if (!addBtn) return;
@@ -117,7 +116,6 @@ document.addEventListener('DOMContentLoaded', function() {
     ) || 0;
     const productId   = document.querySelector('form.cart input[name="product_id"]')?.value || '';
 
-    // Categoría del producto (si está en el breadcrumb o en los datos del producto)
     const categoryEl  = document.querySelector('.posted_in a, nav.woocommerce-breadcrumb a:nth-last-child(2)');
     const category    = categoryEl?.innerText?.trim() || '';
 
@@ -144,7 +142,6 @@ document.addEventListener('click', function(e) {
     const productLink = e.target.closest('.woocommerce-loop-product__link, .woocommerce-LoopProduct-link');
     if (!productLink) return;
 
-    // No interferir si se abre en nueva pestaña
     if (e.ctrlKey || e.metaKey || e.shiftKey) return;
 
     e.preventDefault();
@@ -167,7 +164,6 @@ document.addEventListener('click', function(e) {
         items: [{ item_id: productId, item_name: productName, price, quantity: 1 }]
     });
 
-    // Navegar tras dar tiempo al dataLayer a procesar el evento
     setTimeout(function() {
         window.location.href = href;
     }, 300);
@@ -183,7 +179,6 @@ document.addEventListener('DOMContentLoaded', function() {
         totalEl?.innerText?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0'
     ) || 0;
 
-    // Recopilar productos del carrito
     const items = [];
     document.querySelectorAll('tr.cart_item, .cart_item').forEach(function(row) {
         const name    = row.querySelector('.product-name a, .product-name')?.innerText?.trim() || '';
@@ -208,7 +203,6 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', function() {
     if (!document.querySelector('body.woocommerce-checkout')) return;
 
-    // Intentar leer el total del resumen del pedido
     const totalEl = document.querySelector('.order-total .woocommerce-Price-amount');
     const total   = parseFloat(
         totalEl?.innerText?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0'
@@ -222,15 +216,14 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // EVENTO: add_shipping_info
-// Se dispara cuando el usuario selecciona un método de envío en el checkout.
+// Se dispara al cargar el checkout si ya hay un método preseleccionado,
+// y también al cambiar la selección manualmente.
 document.addEventListener('DOMContentLoaded', function() {
     if (!document.querySelector('body.woocommerce-checkout')) return;
 
-    document.addEventListener('change', function(e) {
-        if (!e.target.matches('input[name^="shipping_method"]')) return;
-
-        const shippingMethod = e.target.value || '';
-        const shippingLabel  = e.target.closest('li')?.querySelector('label')?.innerText?.trim() || shippingMethod;
+    function fireShippingEvent(input) {
+        const shippingMethod = input.value || '';
+        const shippingLabel  = input.closest('li')?.querySelector('label')?.innerText?.trim() || shippingMethod;
         const totalEl        = document.querySelector('.order-total .woocommerce-Price-amount');
         const total          = parseFloat(
             totalEl?.innerText?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0'
@@ -245,18 +238,29 @@ document.addEventListener('DOMContentLoaded', function() {
         if (smartSettings.debug) {
             console.log('[SmartConsent] add_shipping_info:', { shippingMethod, shippingLabel });
         }
+    }
+
+    // Disparar con la opción preseleccionada al cargar la página
+    const preselectedShipping = document.querySelector('input[name^="shipping_method"]:checked');
+    if (preselectedShipping) {
+        fireShippingEvent(preselectedShipping);
+    }
+
+    // Disparar también si el usuario cambia la selección
+    document.addEventListener('change', function(e) {
+        if (!e.target.matches('input[name^="shipping_method"]')) return;
+        fireShippingEvent(e.target);
     });
 });
 
 // EVENTO: add_payment_info
-// Se dispara cuando el usuario selecciona un método de pago en el checkout.
+// Se dispara al cargar el checkout si ya hay un método preseleccionado,
+// y también al cambiar la selección manualmente.
 document.addEventListener('DOMContentLoaded', function() {
     if (!document.querySelector('body.woocommerce-checkout')) return;
 
-    document.addEventListener('change', function(e) {
-        if (!e.target.matches('input[name="payment_method"]')) return;
-
-        const paymentMethod = e.target.value || '';
+    function firePaymentEvent(input) {
+        const paymentMethod = input.value || '';
         const totalEl       = document.querySelector('.order-total .woocommerce-Price-amount');
         const total         = parseFloat(
             totalEl?.innerText?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0'
@@ -271,51 +275,58 @@ document.addEventListener('DOMContentLoaded', function() {
         if (smartSettings.debug) {
             console.log('[SmartConsent] add_payment_info:', { paymentMethod });
         }
+    }
+
+    // Disparar con la opción preseleccionada al cargar la página
+    const preselectedPayment = document.querySelector('input[name="payment_method"]:checked');
+    if (preselectedPayment) {
+        firePaymentEvent(preselectedPayment);
+    }
+
+    // Disparar también si el usuario cambia la selección
+    document.addEventListener('change', function(e) {
+        if (!e.target.matches('input[name="payment_method"]')) return;
+        firePaymentEvent(e.target);
     });
 });
 
 // EVENTO: purchase
-// Se dispara en la página de confirmación de pedido
+// Se dispara en la página de confirmación de pedido (order-received).
+// Usa sessionStorage para evitar duplicados si el usuario recarga la página.
 document.addEventListener('DOMContentLoaded', function() {
     if (!document.querySelector('body.woocommerce-order-received')) return;
 
-    // Obtener el ID del pedido desde la URL (?order=XXXXX) o desde el DOM
     const urlParams = new URLSearchParams(window.location.search);
     const orderId   = urlParams.get('order') ||
                       document.querySelector('.woocommerce-order-overview__order strong')?.innerText?.trim() || '';
 
     if (!orderId) return;
 
-    // Evitar duplicados si el usuario recarga la página de confirmación
     const flagKey = 'scp_purchase_fired_' + orderId;
     if (sessionStorage.getItem(flagKey)) {
         if (smartSettings.debug) console.log('[SmartConsent] purchase ya enviado para pedido:', orderId);
         return;
     }
 
-    // Total del pedido
     const totalEl = document.querySelector('.woocommerce-order-overview__total .woocommerce-Price-amount');
     const total   = parseFloat(
         totalEl?.innerText?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0'
     ) || 0;
 
-    // Impuestos (si están visibles)
     const taxEl = document.querySelector('.woocommerce-order-overview__tax .woocommerce-Price-amount');
     const tax   = parseFloat(
         taxEl?.innerText?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0'
     ) || 0;
 
-    // Envío (si está visible)
     const shippingEl = document.querySelector('.woocommerce-order-overview__shipping .woocommerce-Price-amount');
     const shipping   = parseFloat(
         shippingEl?.innerText?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0'
     ) || 0;
 
-    // Productos del resumen del pedido
     const items = [];
     document.querySelectorAll('.woocommerce-table--order-details tbody tr, .woocommerce-order-item').forEach(function(row) {
-        const nameEl = row.querySelector('.woocommerce-table__product-name a, .woocommerce-table__product-name');
-        const name   = nameEl?.innerText?.trim() || '';
+        const nameEl    = row.querySelector('.woocommerce-table__product-name a, .woocommerce-table__product-name');
+        const name      = nameEl?.innerText?.trim() || '';
         if (!name) return;
 
         const qtyEl     = row.querySelector('.woocommerce-table__product-total .product-quantity, .product-quantity');
@@ -338,7 +349,6 @@ document.addEventListener('DOMContentLoaded', function() {
         items:          items.length ? items : undefined
     });
 
-    // Marcar como enviado para evitar duplicados en recarga
     sessionStorage.setItem(flagKey, '1');
 
     if (smartSettings.debug) {
@@ -352,7 +362,6 @@ document.addEventListener('click', function(e) {
     const removeLink = e.target.closest('a.remove');
     if (!removeLink) return;
 
-    // Leer datos del producto antes de que WooCommerce actualice el DOM
     const productId   = removeLink.dataset.product_id || removeLink.getAttribute('data-product_id') || '';
     const row         = removeLink.closest('tr.cart_item, .cart_item');
     const productName = row?.querySelector('.product-name a, .product-name')?.innerText?.trim() || '';
@@ -361,7 +370,7 @@ document.addEventListener('click', function(e) {
         priceEl?.innerText?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0'
     ) || 0;
 
-    if (!productId) return; // no es un botón de eliminar de WooCommerce
+    if (!productId) return;
 
     trackEvent('remove_from_cart', {
         currency: 'EUR',
@@ -390,32 +399,26 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // EVENTO: login
-// Se dispara cuando WooCommerce redirige al usuario tras iniciar sesión.
-// Detecta el parámetro ?loggedin=true que añade WooCommerce en la redirección.
+// Detectado desde PHP via cookie temporal establecida en el hook
+// 'woocommerce_login'. Más fiable que leer parámetros de URL.
 document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (!urlParams.has('loggedin')) return;
+    if (smartSettings.justLoggedIn !== 'true') return;
 
     trackEvent('login', { method: 'WooCommerce' });
 
     if (smartSettings.debug) {
-        console.log('[SmartConsent] login detectado.');
+        console.log('[SmartConsent] login detectado via PHP.');
     }
 });
 
 // EVENTO: sign_up
-// Se dispara en la página de confirmación tras el registro de un nuevo usuario.
-// Detecta la clase body que WooCommerce añade en "mi cuenta"
-// cuando el usuario acaba de registrarse (parámetro ?account-registered).
+// Detectado desde PHP comprobando el parámetro ?account-registered en la URL.
 document.addEventListener('DOMContentLoaded', function() {
-    if (!document.querySelector('body.woocommerce-account')) return;
-
-    const urlParams = new URLSearchParams(window.location.search);
-    if (!urlParams.has('account-registered') && !urlParams.has('registered')) return;
+    if (smartSettings.justRegistered !== 'true') return;
 
     trackEvent('sign_up', { method: 'WooCommerce' });
 
     if (smartSettings.debug) {
-        console.log('[SmartConsent] sign_up detectado.');
+        console.log('[SmartConsent] sign_up detectado via PHP.');
     }
 });
