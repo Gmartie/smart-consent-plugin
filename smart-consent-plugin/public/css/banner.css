@@ -1,5 +1,3 @@
-/* Smart Consent Plugin - Banner Styles */
-
 #scp-consent-banner {
     display: none;
     position: fixed;
@@ -7,13 +5,16 @@
     left: 0;
     right: 0;
     z-index: 99999;
-    background: #ffffff;
+
+    background: var(--scp-bg, #ffffff);
     border-top: 1px solid #e0e0e0;
     box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
     padding: 20px 24px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    /* Tipografía personalizable */
+    font-family: var(--scp-font, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
     font-size: 14px;
-    color: #333333;
+    /* Color de texto principal */
+    color: var(--scp-text, #333333);
     line-height: 1.6;
 }
 
@@ -35,12 +36,12 @@
     font-size: 16px;
     font-weight: 600;
     margin: 0 0 6px;
-    color: #111111;
+    color: var(--scp-text, #111111);
 }
 
 .scp-banner-message {
     margin: 0;
-    color: #555555;
+    color: var(--scp-text, #555555);
 }
 
 .scp-banner-actions {
@@ -64,27 +65,28 @@
 }
 
 .scp-btn-accept {
-    background-color: #0073aa;
-    color: #ffffff;
-    border-color: #0073aa;
+    /* Colores del botón Aceptar desde variables */
+    background-color: var(--scp-btn-accept-bg, #0073aa);
+    color: var(--scp-btn-accept-text, #ffffff);
+    border-color: var(--scp-btn-accept-bg, #0073aa);
 }
 
 .scp-btn-accept:hover,
 .scp-btn-accept:focus {
-    background-color: #005a87;
-    border-color: #005a87;
+    filter: brightness(0.88);
     outline: none;
 }
 
 .scp-btn-reject {
-    background-color: transparent;
-    color: #0073aa;
-    border-color: #0073aa;
+    /* Colores del botón Rechazar desde variables */
+    background-color: var(--scp-btn-reject-bg, transparent);
+    color: var(--scp-btn-reject-text, #0073aa);
+    border-color: var(--scp-btn-reject-text, #0073aa);
 }
 
 .scp-btn-reject:hover,
 .scp-btn-reject:focus {
-    background-color: #f0f8ff;
+    filter: brightness(0.92);
     outline: none;
 }
 
