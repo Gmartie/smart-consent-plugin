@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // EVENTO: add_to_cart
-// 1. Producto simple en listado
+//Producto simple en listado
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('add_to_cart_button')) {
         const price       = parseFloat(e.target.dataset.price) || 0;
@@ -48,7 +48,7 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// 2. Producto variable en página de detalle
+//Producto variable en página de detalle
 document.addEventListener('DOMContentLoaded', function() {
     const addBtn = document.querySelector('button.single_add_to_cart_button');
     if (!addBtn) return;

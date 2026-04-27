@@ -1,7 +1,5 @@
 <?php
 /**
- * enqueue.php
- *
  * - Inyecta Google Consent Mode v2 (estado inicial) en el <head> ANTES que GTM.
  * - Inyecta el snippet de Google Tag Manager (si se ha configurado un GTM ID).
  * - Inyecta el snippet de Google Analytics 4 directamente (si se ha configurado
@@ -11,7 +9,7 @@
 
 if (!defined('ABSPATH')) exit;
 
-// 1. CONSENT MODE  + GTM/GA4 — inyectado en <head> con prioridad máxima
+//CONSENT MODE  + GTM/GA4 — inyectado en <head> con prioridad máxima
 add_action('wp_head', function () {
 
     $consented  = isset($_COOKIE['smart_consent']) && $_COOKIE['smart_consent'] === 'accepted';

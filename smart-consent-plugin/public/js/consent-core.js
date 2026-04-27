@@ -1,6 +1,4 @@
 /**
- * consent-core.js
- *
  * Gestiona el banner de consentimiento y actualiza Google Consent Mode v2.
  * Compatible con GTM y con GA4 directo (sin GTM).
  *

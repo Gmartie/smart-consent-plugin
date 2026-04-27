@@ -1,7 +1,5 @@
 <?php
 /**
- * settings-page.php
- *
  * Página de ajustes del plugin en el panel de WordPress.
  * Incluye configuración de GTM y GA4 directamente, sin depender de plugins externos.
  */
@@ -166,7 +164,7 @@ add_action('admin_init', function () {
         'smart-consent', 'smart_main_section'
     );
 
-    // SECCIÓN 3 — Personalización del Banner
+    //Personalización del Banner
     add_settings_section(
         'smart_banner_design_section',
         'Personalización del Banner',
