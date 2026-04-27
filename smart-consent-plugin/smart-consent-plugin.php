@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Smart Consent Tracker
- * Description: Gestión de consentimiento de cookies compatible con Google Consent Mode v2 y GTM.
- * Version: 1.0.0
+ * Description: Gestión de consentimiento de cookies compatible con Google Consent Mode v2. Integra GTM y GA4 de forma nativa, sin dependencias externas.
+ * Version: 3.0.0
  * Author: Gabriel
  */
 
