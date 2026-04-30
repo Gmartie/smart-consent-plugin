@@ -1,17 +1,20 @@
 /**
- * Gestiona el botón flotante de galleta, el banner de consentimiento
- * y actualiza Google Consent Mode v2.
- * Compatible con GTM y con GA4 directo (sin GTM).
+ * Gestiona el botón flotante de galleta y el banner de consentimiento.
+ * Compatible con GTM y GA4 directo.
+ *
+ * Política de visibilidad:
+ *  - El botón de galleta es SIEMPRE visible.
+ *  - El banner NUNCA se abre solo — solo al hacer clic en el botón.
+ *  - Al aceptar o rechazar, el banner se cierra. El botón permanece.
  */
 
 window.dataLayer = window.dataLayer || [];
 function gtag() { dataLayer.push(arguments); }
 
-// Estado de consentimiento inicial (viene de PHP vía wp_localize_script)
 window.userConsented = (smartSettings.consented === 'true');
 
 if (smartSettings.debug) {
-    const modo = smartSettings.useGTM === 'true'
+    var modo = smartSettings.useGTM === 'true'
         ? 'GTM (' + (smartSettings.gtmId || '') + ')'
         : smartSettings.useGA4 === 'true'
             ? 'GA4 directo (' + smartSettings.ga4Id + ')'
@@ -23,48 +26,45 @@ function saveConsent(consent) {
     fetch(smartSettings.ajax_url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `action=save_consent&consent=${consent}&nonce=${smartSettings.nonce}`
+        body: 'action=save_consent&consent=' + consent + '&nonce=' + smartSettings.nonce
     });
+}
+
+function openBanner(banner) {
+    if (!banner) return;
+    banner.style.animation = 'none';
+    banner.offsetHeight;
+    banner.style.animation = '';
+    banner.style.display   = 'block';
+}
+
+function closeBanner(banner) {
+    if (banner) banner.style.display = 'none';
 }
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    const banner    = document.getElementById('scp-consent-banner');
-    const trigger   = document.getElementById('scp-cookie-trigger');
-    const acceptBtn = document.getElementById('accept-cookies');
-    const rejectBtn = document.getElementById('reject-cookies');
+    var banner    = document.getElementById('scp-consent-banner');
+    var trigger   = document.getElementById('scp-cookie-trigger');
+    var acceptBtn = document.getElementById('accept-cookies');
+    var rejectBtn = document.getElementById('reject-cookies');
 
-    // ── Mostrar/ocultar según estado de consentimiento ──────────────────
-    if (window.userConsented) {
-        // Ya había aceptado: ocultar todo silenciosamente.
-        // El consent update ya se hizo en <head> por PHP.
-        if (banner)  banner.style.display  = 'none';
-        if (trigger) trigger.style.display = 'none';
-        if (smartSettings.debug) {
-            console.log('[SmartConsent] Usuario ya había aceptado. Consent Mode ya actualizado en <head>.');
-        }
-    } else {
-        // Sin consentimiento previo: mostrar solo el botón flotante.
-        if (banner)  banner.style.display  = 'none';
-        if (trigger) trigger.style.display = 'flex';
-    }
+    // Banner siempre cerrado al cargar — solo se abre con el botón
+    closeBanner(banner);
 
-    // ── Abrir banner al hacer clic en el botón de galleta ───────────────
+    // Toggle: clic en el botón abre/cierra el banner
     if (trigger) {
         trigger.addEventListener('click', function () {
-            if (banner) {
-                banner.style.display = 'block';
-                // Reiniciar la animación de entrada cada vez que se abre
-                banner.style.animation = 'none';
-                // eslint-disable-next-line no-unused-expressions
-                banner.offsetHeight; // forzar reflow
-                banner.style.animation = '';
+            if (!banner) return;
+            if (banner.style.display === 'block') {
+                closeBanner(banner);
+            } else {
+                openBanner(banner);
             }
-            trigger.classList.add('scp-trigger--hidden');
         });
     }
 
-    // ── Aceptar ──────────────────────────────────────────────────────────
+    // Aceptar
     if (acceptBtn) {
         acceptBtn.addEventListener('click', function () {
             window.userConsented = true;
@@ -78,32 +78,20 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             flushEvents();
+            closeBanner(banner);
 
-            if (banner)  banner.style.display = 'none';
-            if (trigger) trigger.style.display = 'none'; // ya no necesita el botón
-
-            if (smartSettings.debug) {
-                console.log('[SmartConsent] Aceptado. Consent Mode actualizado a "granted".');
-            }
+            if (smartSettings.debug) console.log('[SmartConsent] Aceptado. Consent Mode → granted.');
         });
     }
 
-    // ── Rechazar ─────────────────────────────────────────────────────────
+    // Rechazar
     if (rejectBtn) {
         rejectBtn.addEventListener('click', function () {
             window.userConsented = false;
             saveConsent('rejected');
+            closeBanner(banner);
 
-            if (banner) banner.style.display = 'none';
-            // Volver a mostrar el botón por si el usuario quiere cambiar de opinión
-            if (trigger) {
-                trigger.classList.remove('scp-trigger--hidden');
-                trigger.style.display = 'flex';
-            }
-
-            if (smartSettings.debug) {
-                console.log('[SmartConsent] Rechazado. GA4/GTM no recibirán datos.');
-            }
+            if (smartSettings.debug) console.log('[SmartConsent] Rechazado. GA4/GTM no recibirán datos.');
         });
     }
 });
