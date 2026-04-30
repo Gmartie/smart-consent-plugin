@@ -1,10 +1,7 @@
 /**
- * Gestiona el banner de consentimiento y actualiza Google Consent Mode v2.
+ * Gestiona el botón flotante de galleta, el banner de consentimiento
+ * y actualiza Google Consent Mode v2.
  * Compatible con GTM y con GA4 directo (sin GTM).
- *
- * El dataLayer y gtag() ya están declarados en <head> por enqueue.php
- * (antes de que cargue GTM o GA4), así que aquí solo nos aseguramos
- * de no sobreescribirlos.
  */
 
 window.dataLayer = window.dataLayer || [];
@@ -33,27 +30,46 @@ function saveConsent(consent) {
 document.addEventListener('DOMContentLoaded', function () {
 
     const banner    = document.getElementById('scp-consent-banner');
+    const trigger   = document.getElementById('scp-cookie-trigger');
     const acceptBtn = document.getElementById('accept-cookies');
     const rejectBtn = document.getElementById('reject-cookies');
 
+    // ── Mostrar/ocultar según estado de consentimiento ──────────────────
     if (window.userConsented) {
-        // Ya tenía consentimiento: ocultar banner.
-        // El consent update ya se hizo en <head> por PHP, antes de cargar GTM/GA4.
-        if (banner) banner.style.display = 'none';
+        // Ya había aceptado: ocultar todo silenciosamente.
+        // El consent update ya se hizo en <head> por PHP.
+        if (banner)  banner.style.display  = 'none';
+        if (trigger) trigger.style.display = 'none';
         if (smartSettings.debug) {
             console.log('[SmartConsent] Usuario ya había aceptado. Consent Mode ya actualizado en <head>.');
         }
     } else {
-        if (banner) banner.style.display = 'block';
+        // Sin consentimiento previo: mostrar solo el botón flotante.
+        if (banner)  banner.style.display  = 'none';
+        if (trigger) trigger.style.display = 'flex';
     }
 
+    // ── Abrir banner al hacer clic en el botón de galleta ───────────────
+    if (trigger) {
+        trigger.addEventListener('click', function () {
+            if (banner) {
+                banner.style.display = 'block';
+                // Reiniciar la animación de entrada cada vez que se abre
+                banner.style.animation = 'none';
+                // eslint-disable-next-line no-unused-expressions
+                banner.offsetHeight; // forzar reflow
+                banner.style.animation = '';
+            }
+            trigger.classList.add('scp-trigger--hidden');
+        });
+    }
+
+    // ── Aceptar ──────────────────────────────────────────────────────────
     if (acceptBtn) {
         acceptBtn.addEventListener('click', function () {
             window.userConsented = true;
             saveConsent('accepted');
 
-            // Actualizar Consent Mode v2 → GTM disparará las etiquetas pendientes
-            // o GA4 directo comenzará a registrar datos
             gtag('consent', 'update', {
                 'ad_storage':         'granted',
                 'analytics_storage':  'granted',
@@ -61,10 +77,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 'ad_personalization': 'granted'
             });
 
-            // Vaciar la cola de eventos acumulados mientras no había consentimiento
             flushEvents();
 
-            if (banner) banner.style.display = 'none';
+            if (banner)  banner.style.display = 'none';
+            if (trigger) trigger.style.display = 'none'; // ya no necesita el botón
 
             if (smartSettings.debug) {
                 console.log('[SmartConsent] Aceptado. Consent Mode actualizado a "granted".');
@@ -72,11 +88,19 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // ── Rechazar ─────────────────────────────────────────────────────────
     if (rejectBtn) {
         rejectBtn.addEventListener('click', function () {
             window.userConsented = false;
             saveConsent('rejected');
+
             if (banner) banner.style.display = 'none';
+            // Volver a mostrar el botón por si el usuario quiere cambiar de opinión
+            if (trigger) {
+                trigger.classList.remove('scp-trigger--hidden');
+                trigger.style.display = 'flex';
+            }
+
             if (smartSettings.debug) {
                 console.log('[SmartConsent] Rechazado. GA4/GTM no recibirán datos.');
             }

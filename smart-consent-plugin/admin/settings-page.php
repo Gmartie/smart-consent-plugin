@@ -78,6 +78,8 @@ add_action('admin_init', function () {
         'smart_btn_accept_text',
         'smart_btn_reject_bg',
         'smart_btn_reject_text',
+        'smart_trigger_position',
+        'smart_trigger_bg',
     ];
     foreach ($options as $opt) {
         register_setting('smart_consent_group', $opt);
@@ -305,6 +307,24 @@ add_action('admin_init', function () {
 
     add_settings_field('smart_btn_reject_text', 'Botón Rechazar — texto',
         function () use ($color_field) { $color_field('smart_btn_reject_text', '#0073aa'); },
+        'smart-consent', 'smart_banner_design_section'
+    );
+
+    add_settings_field(
+        'smart_trigger_position', 'Posición del botón de galleta',
+        function () {
+            $value = get_option('smart_trigger_position', 'left');
+            echo "<select name='smart_trigger_position'>";
+            echo "<option value='left'"  . selected($value, 'left',  false) . ">Abajo a la izquierda</option>";
+            echo "<option value='right'" . selected($value, 'right', false) . ">Abajo a la derecha</option>";
+            echo "</select>";
+            echo "<p class='description'>Elige en qué esquina aparece el botón flotante con el icono de galleta.</p>";
+        },
+        'smart-consent', 'smart_banner_design_section'
+    );
+
+    add_settings_field('smart_trigger_bg', 'Botón galleta — color de fondo',
+        function () use ($color_field) { $color_field('smart_trigger_bg', '#0073aa'); },
         'smart-consent', 'smart_banner_design_section'
     );
 });

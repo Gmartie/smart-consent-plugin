@@ -1,3 +1,51 @@
+/* ══════════════════════════════════════════════════════
+   SMART CONSENT — banner.css
+   ══════════════════════════════════════════════════════ */
+
+/* ── Botón flotante de galleta ──────────────────────── */
+.scp-cookie-trigger {
+    position: fixed;
+    bottom: 20px;
+    z-index: 100000;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--scp-trigger-bg, #0073aa);
+    color: var(--scp-trigger-color, #ffffff);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.scp-cookie-trigger--left  { left: 20px; }
+.scp-cookie-trigger--right { right: 20px; }
+
+.scp-cookie-trigger:hover,
+.scp-cookie-trigger:focus {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.32);
+    outline: none;
+}
+
+.scp-cookie-trigger:focus-visible {
+    outline: 3px solid var(--scp-trigger-bg, #0073aa);
+    outline-offset: 3px;
+}
+
+/* Ocultar el botón cuando el banner está visible */
+.scp-cookie-trigger.scp-trigger--hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.8);
+}
+
+/* ── Banner de consentimiento ───────────────────────── */
 #scp-consent-banner {
     display: none;
     position: fixed;
@@ -10,12 +58,18 @@
     border-top: 1px solid #e0e0e0;
     box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
     padding: 20px 24px;
-    /* Tipografía personalizable */
     font-family: var(--scp-font, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
     font-size: 14px;
-    /* Color de texto principal */
     color: var(--scp-text, #333333);
     line-height: 1.6;
+
+    /* Animación de entrada */
+    animation: scpSlideUp 0.25s ease;
+}
+
+@keyframes scpSlideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
 }
 
 .scp-banner-inner {
@@ -44,6 +98,7 @@
     color: var(--scp-text, #555555);
 }
 
+/* ── Botones Aceptar / Rechazar ─────────────────────── */
 .scp-banner-actions {
     display: flex;
     gap: 12px;
@@ -65,48 +120,22 @@
 }
 
 .scp-btn-accept {
-    /* Colores del botón Aceptar desde variables */
     background-color: var(--scp-btn-accept-bg, #0073aa);
     color: var(--scp-btn-accept-text, #ffffff);
     border-color: var(--scp-btn-accept-bg, #0073aa);
 }
-
 .scp-btn-accept:hover,
-.scp-btn-accept:focus {
-    filter: brightness(0.88);
-    outline: none;
-}
+.scp-btn-accept:focus { filter: brightness(0.88); outline: none; }
 
 .scp-btn-reject {
-    /* Colores del botón Rechazar desde variables */
     background-color: var(--scp-btn-reject-bg, transparent);
     color: var(--scp-btn-reject-text, #0073aa);
     border-color: var(--scp-btn-reject-text, #0073aa);
 }
-
 .scp-btn-reject:hover,
-.scp-btn-reject:focus {
-    filter: brightness(0.92);
-    outline: none;
-}
+.scp-btn-reject:focus { filter: brightness(0.92); outline: none; }
 
-@media (max-width: 600px) {
-    .scp-banner-inner {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-    }
-
-    .scp-banner-actions {
-        width: 100%;
-    }
-
-    .scp-btn {
-        flex: 1;
-        text-align: center;
-    }
-}
-/* ── Links de política (política de cookies, privacidad, etc.) ─────────── */
+/* ── Links de política ──────────────────────────────── */
 .scp-banner-links {
     display: flex;
     flex-wrap: wrap;
@@ -123,15 +152,21 @@
     transition: opacity 0.15s ease;
     white-space: nowrap;
 }
-
 .scp-banner-link:hover,
-.scp-banner-link:focus {
-    opacity: 1;
-    outline: none;
-}
+.scp-banner-link:focus { opacity: 1; outline: none; }
 
+/* ── Responsive ─────────────────────────────────────── */
 @media (max-width: 600px) {
-    .scp-banner-links {
-        gap: 4px 10px;
+    .scp-banner-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
     }
+    .scp-banner-actions { width: 100%; }
+    .scp-btn { flex: 1; text-align: center; }
+    .scp-banner-links { gap: 4px 10px; }
+
+    .scp-cookie-trigger { bottom: 16px; }
+    .scp-cookie-trigger--left  { left: 16px; }
+    .scp-cookie-trigger--right { right: 16px; }
 }
