@@ -106,3 +106,32 @@
         text-align: center;
     }
 }
+/* ── Links de política (política de cookies, privacidad, etc.) ─────────── */
+.scp-banner-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin-top: 8px;
+}
+
+.scp-banner-link {
+    font-size: 12px;
+    color: var(--scp-text, #555555);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    opacity: 0.75;
+    transition: opacity 0.15s ease;
+    white-space: nowrap;
+}
+
+.scp-banner-link:hover,
+.scp-banner-link:focus {
+    opacity: 1;
+    outline: none;
+}
+
+@media (max-width: 600px) {
+    .scp-banner-links {
+        gap: 4px 10px;
+    }
+}

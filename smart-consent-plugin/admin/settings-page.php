@@ -69,6 +69,7 @@ add_action('admin_init', function () {
         'smart_enable_analytics',
         'smart_enable_ads',
         'smart_banner_text',
+        'smart_banner_links',
         'smart_debug_mode',
         'smart_banner_bg_color',
         'smart_banner_text_color',
@@ -149,7 +150,74 @@ add_action('admin_init', function () {
         'smart_banner_text', 'Texto del banner',
         function () {
             $value = get_option('smart_banner_text', '');
-            echo "<textarea name='smart_banner_text' rows='3' cols='50'>" . esc_textarea($value) . "</textarea>";
+            echo "<textarea name='smart_banner_text' rows='3' cols='50' placeholder='Usamos cookies para mejorar la experiencia.'>" . esc_textarea($value) . "</textarea>";
+            echo "<p class='description'>Si se deja vacío se usará el texto por defecto. Puedes usar HTML básico.</p>";
+        },
+        'smart-consent', 'smart_main_section'
+    );
+
+    add_settings_field(
+        'smart_banner_links', 'Links del banner',
+        function () {
+            $raw   = get_option('smart_banner_links', '');
+            $links = [];
+            if (!empty($raw)) {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) $links = $decoded;
+            }
+            if (empty($links)) {
+                $links = [['label' => '', 'url' => '']];
+            }
+            echo "<div id='scp-links-wrapper'>";
+            foreach ($links as $i => $link) {
+                echo "<div class='scp-link-row' style='display:flex;gap:8px;align-items:center;margin-bottom:6px;'>";
+                echo "<input type='text' class='scp-link-label' placeholder='Etiqueta (ej. Política de cookies)' value='" . esc_attr($link['label']) . "' style='width:210px;' />";
+                echo "<input type='url' class='scp-link-url' placeholder='https://tudominio.com/politica-cookies' value='" . esc_attr($link['url']) . "' style='width:280px;' />";
+                echo "<button type='button' class='button scp-remove-link' title='Eliminar fila'>&#x2715;</button>";
+                echo "</div>";
+            }
+            echo "</div>";
+            echo "<button type='button' class='button' id='scp-add-link'>+ A&#241;adir link</button>";
+            echo "<input type='hidden' name='smart_banner_links' id='scp-links-json' value='" . esc_attr($raw) . "' />";
+            echo "<p class='description'>Los links aparecerán en la parte inferior izquierda del banner (ej. Política de cookies, Política de privacidad).</p>";
+            ?>
+            <script>
+            (function () {
+                var wrapper   = document.getElementById('scp-links-wrapper');
+                var addBtn    = document.getElementById('scp-add-link');
+                var jsonInput = document.getElementById('scp-links-json');
+
+                function addRow(label, url) {
+                    var row = document.createElement('div');
+                    row.className = 'scp-link-row';
+                    row.style.cssText = 'display:flex;gap:8px;align-items:center;margin-bottom:6px;';
+                    row.innerHTML = '<input type="text" class="scp-link-label" placeholder="Etiqueta (ej. Política de cookies)" value="' + (label||'') + '" style="width:210px;" />'
+                                  + '<input type="url" class="scp-link-url" placeholder="https://tudominio.com/politica-cookies" value="' + (url||'') + '" style="width:280px;" />'
+                                  + '<button type="button" class="button scp-remove-link" title="Eliminar fila">&#x2715;</button>';
+                    wrapper.appendChild(row);
+                }
+
+                addBtn.addEventListener('click', function () { addRow('', ''); });
+
+                wrapper.addEventListener('click', function (e) {
+                    if (e.target.classList.contains('scp-remove-link')) {
+                        e.target.closest('.scp-link-row').remove();
+                    }
+                });
+
+                document.querySelector('form').addEventListener('submit', function () {
+                    var rows  = wrapper.querySelectorAll('.scp-link-row');
+                    var links = [];
+                    rows.forEach(function (row) {
+                        var label = row.querySelector('.scp-link-label').value.trim();
+                        var url   = row.querySelector('.scp-link-url').value.trim();
+                        if (label || url) links.push({ label: label, url: url });
+                    });
+                    jsonInput.value = JSON.stringify(links);
+                });
+            })();
+            </script>
+            <?php
         },
         'smart-consent', 'smart_main_section'
     );
