@@ -385,7 +385,7 @@ add_action('admin_init', function () {
         'smart-consent', 'smart_banner_design_section'
     );
 
-    add_settings_field('smart_banner_icon_color', 'Icono cookie en el banner — color',
+    add_settings_field('smart_banner_icon_color', 'Icono dactilar en el banner — color',
         function () use ($color_field) { $color_field('smart_banner_icon_color', '#4a1050'); },
         'smart-consent', 'smart_banner_design_section'
     );

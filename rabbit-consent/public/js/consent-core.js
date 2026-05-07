@@ -80,7 +80,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 'ad_personalization': 'granted'
             });
 
-            flushEvents();
+            // Pequeño delay para que GTM procese el consent update antes de recibir eventos
+            setTimeout(function () {
+                flushEvents();
+            }, 300);
+
             closeBanner(banner);
 
             if (smartSettings.debug) console.log('[SmartConsent] Aceptado. Consent Mode → granted.');
