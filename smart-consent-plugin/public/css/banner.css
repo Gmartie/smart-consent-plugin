@@ -160,14 +160,14 @@
     font-weight: 600;
     cursor: pointer;
     border: 2px solid transparent;
-    transition: filter 0.18s ease, transform 0.12s ease;
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.12s ease;
     text-decoration: none;
     white-space: nowrap;
     line-height: 1.4;
     letter-spacing: 0.01em;
 }
 
-.scp-btn:hover  { filter: brightness(0.9); transform: translateY(-1px); }
+.scp-btn:hover  { transform: translateY(-1px); }
 .scp-btn:active { transform: translateY(0); }
 .scp-btn:focus  { outline: none; }
 .scp-btn:focus-visible { outline: 3px solid var(--scp-btn-accept-bg, #4a1050); outline-offset: 3px; }
@@ -179,12 +179,24 @@
     flex: 1;
     text-align: center;
 }
+.scp-btn-accept:hover,
+.scp-btn-accept:focus {
+    background-color: var(--scp-btn-accept-hover-bg, #3a0c40);
+    color: var(--scp-btn-accept-hover-text, #ffffff);
+    border-color: var(--scp-btn-accept-hover-bg, #3a0c40);
+}
 
 .scp-btn-reject {
     background-color: var(--scp-btn-reject-bg, transparent);
     color: var(--scp-btn-reject-text, #4a1050);
     border-color: var(--scp-btn-reject-text, #4a1050);
     flex-shrink: 0;
+}
+.scp-btn-reject:hover,
+.scp-btn-reject:focus {
+    background-color: var(--scp-btn-reject-hover-bg, #f0f0f0);
+    color: var(--scp-btn-reject-hover-text, #4a1050);
+    border-color: var(--scp-btn-reject-hover-text, #4a1050);
 }
 
 /* ── Responsive ─────────────────────────────────────── */

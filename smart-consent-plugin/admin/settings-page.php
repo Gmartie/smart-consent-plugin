@@ -82,6 +82,10 @@ add_action('admin_init', function () {
         'smart_trigger_bg',
         'smart_trigger_icon_color',
         'smart_banner_icon_color',
+        'smart_btn_accept_hover_bg',
+        'smart_btn_accept_hover_text',
+        'smart_btn_reject_hover_bg',
+        'smart_btn_reject_hover_text',
     ];
     foreach ($options as $opt) {
         register_setting('smart_consent_group', $opt);
@@ -302,6 +306,16 @@ add_action('admin_init', function () {
         'smart-consent', 'smart_banner_design_section'
     );
 
+    add_settings_field('smart_btn_accept_hover_bg', 'Botón Aceptar — fondo (hover)',
+        function () use ($color_field) { $color_field('smart_btn_accept_hover_bg', '#005a87'); },
+        'smart-consent', 'smart_banner_design_section'
+    );
+
+    add_settings_field('smart_btn_accept_hover_text', 'Botón Aceptar — texto (hover)',
+        function () use ($color_field) { $color_field('smart_btn_accept_hover_text', '#ffffff'); },
+        'smart-consent', 'smart_banner_design_section'
+    );
+
     add_settings_field('smart_btn_reject_bg', 'Botón Rechazar — fondo',
         function () use ($color_field) { $color_field('smart_btn_reject_bg', '#ffffff'); },
         'smart-consent', 'smart_banner_design_section'
@@ -309,6 +323,16 @@ add_action('admin_init', function () {
 
     add_settings_field('smart_btn_reject_text', 'Botón Rechazar — texto',
         function () use ($color_field) { $color_field('smart_btn_reject_text', '#0073aa'); },
+        'smart-consent', 'smart_banner_design_section'
+    );
+
+    add_settings_field('smart_btn_reject_hover_bg', 'Botón Rechazar — fondo (hover)',
+        function () use ($color_field) { $color_field('smart_btn_reject_hover_bg', '#f0f0f0'); },
+        'smart-consent', 'smart_banner_design_section'
+    );
+
+    add_settings_field('smart_btn_reject_hover_text', 'Botón Rechazar — texto (hover)',
+        function () use ($color_field) { $color_field('smart_btn_reject_hover_text', '#0073aa'); },
         'smart-consent', 'smart_banner_design_section'
     );
 

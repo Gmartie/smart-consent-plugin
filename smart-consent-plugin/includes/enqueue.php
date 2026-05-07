@@ -30,27 +30,35 @@ add_action('wp_head', function () {
     $bg_color        = get_option('smart_banner_bg_color',    '#ffffff');
     $text_color      = get_option('smart_banner_text_color',  '#333333');
     $font_family     = $font ? "'{$font}', sans-serif" : '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
-    $btn_accept_bg   = get_option('smart_btn_accept_bg',      '#0073aa');
-    $btn_accept_text = get_option('smart_btn_accept_text',    '#ffffff');
-    $btn_reject_bg   = get_option('smart_btn_reject_bg',      '#ffffff');
-    $btn_reject_text = get_option('smart_btn_reject_text',    '#0073aa');
-    $trigger_bg           = get_option('smart_trigger_bg',            '#0073aa');
-    $trigger_icon_color   = get_option('smart_trigger_icon_color',    '#ffffff');
-    $banner_icon_color    = get_option('smart_banner_icon_color',     '#4a1050');
+    $btn_accept_bg        = get_option('smart_btn_accept_bg',           '#0073aa');
+    $btn_accept_text      = get_option('smart_btn_accept_text',         '#ffffff');
+    $btn_accept_hover_bg  = get_option('smart_btn_accept_hover_bg',     '#005a87');
+    $btn_accept_hover_txt = get_option('smart_btn_accept_hover_text',   '#ffffff');
+    $btn_reject_bg        = get_option('smart_btn_reject_bg',           '#ffffff');
+    $btn_reject_text      = get_option('smart_btn_reject_text',         '#0073aa');
+    $btn_reject_hover_bg  = get_option('smart_btn_reject_hover_bg',     '#f0f0f0');
+    $btn_reject_hover_txt = get_option('smart_btn_reject_hover_text',   '#0073aa');
+    $trigger_bg           = get_option('smart_trigger_bg',              '#0073aa');
+    $trigger_icon_color   = get_option('smart_trigger_icon_color',      '#ffffff');
+    $banner_icon_color    = get_option('smart_banner_icon_color',       '#4a1050');
     ?>
     <style>
         :root {
-            --scp-bg:              <?php echo esc_attr($bg_color); ?>;
-            --scp-text:            <?php echo esc_attr($text_color); ?>;
-            --scp-font:            <?php echo $font_family; ?>;
-            --scp-btn-accept-bg:   <?php echo esc_attr($btn_accept_bg); ?>;
-            --scp-btn-accept-text: <?php echo esc_attr($btn_accept_text); ?>;
-            --scp-btn-reject-bg:   <?php echo esc_attr($btn_reject_bg); ?>;
-            --scp-btn-reject-text: <?php echo esc_attr($btn_reject_text); ?>;
-            --scp-trigger-bg:          <?php echo esc_attr($trigger_bg); ?>;
-            --scp-trigger-color:       <?php echo esc_attr($trigger_icon_color); ?>;
-            --scp-trigger-icon-color:  <?php echo esc_attr($trigger_icon_color); ?>;
-            --scp-icon-color:          <?php echo esc_attr($banner_icon_color); ?>;
+            --scp-bg:                    <?php echo esc_attr($bg_color); ?>;
+            --scp-text:                  <?php echo esc_attr($text_color); ?>;
+            --scp-font:                  <?php echo $font_family; ?>;
+            --scp-btn-accept-bg:         <?php echo esc_attr($btn_accept_bg); ?>;
+            --scp-btn-accept-text:       <?php echo esc_attr($btn_accept_text); ?>;
+            --scp-btn-accept-hover-bg:   <?php echo esc_attr($btn_accept_hover_bg); ?>;
+            --scp-btn-accept-hover-text: <?php echo esc_attr($btn_accept_hover_txt); ?>;
+            --scp-btn-reject-bg:         <?php echo esc_attr($btn_reject_bg); ?>;
+            --scp-btn-reject-text:       <?php echo esc_attr($btn_reject_text); ?>;
+            --scp-btn-reject-hover-bg:   <?php echo esc_attr($btn_reject_hover_bg); ?>;
+            --scp-btn-reject-hover-text: <?php echo esc_attr($btn_reject_hover_txt); ?>;
+            --scp-trigger-bg:            <?php echo esc_attr($trigger_bg); ?>;
+            --scp-trigger-color:         <?php echo esc_attr($trigger_icon_color); ?>;
+            --scp-trigger-icon-color:    <?php echo esc_attr($trigger_icon_color); ?>;
+            --scp-icon-color:            <?php echo esc_attr($banner_icon_color); ?>;
         }
     </style>
 
