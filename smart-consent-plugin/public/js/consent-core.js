@@ -1,11 +1,5 @@
 /**
- * Gestiona el botón flotante de galleta y el banner de consentimiento.
- * Compatible con GTM y GA4 directo.
- *
- * Política de visibilidad:
- *  - El botón de galleta es SIEMPRE visible.
- *  - El banner NUNCA se abre solo — solo al hacer clic en el botón.
- *  - Al aceptar o rechazar, el banner se cierra. El botón permanece.
+ * Gestiona el botón flotante dactilar y el banner de consentimiento (tarjeta centrada).
  */
 
 window.dataLayer = window.dataLayer || [];
@@ -35,11 +29,11 @@ function openBanner(banner) {
     banner.style.animation = 'none';
     banner.offsetHeight;
     banner.style.animation = '';
-    banner.style.display   = 'block';
+    banner.classList.add('scp-visible');
 }
 
 function closeBanner(banner) {
-    if (banner) banner.style.display = 'none';
+    if (banner) banner.classList.remove('scp-visible');
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -56,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (trigger) {
         trigger.addEventListener('click', function () {
             if (!banner) return;
-            if (banner.style.display === 'block') {
+            if (banner.classList.contains('scp-visible')) {
                 closeBanner(banner);
             } else {
                 openBanner(banner);
@@ -64,7 +58,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Aceptar
+    // Cerrar al hacer clic en el overlay (fuera de la tarjeta)
+    if (banner) {
+        banner.addEventListener('click', function (e) {
+            if (e.target === banner) {
+                closeBanner(banner);
+            }
+        });
+    }
+
+    // Guardar preferencias (aceptar)
     if (acceptBtn) {
         acceptBtn.addEventListener('click', function () {
             window.userConsented = true;

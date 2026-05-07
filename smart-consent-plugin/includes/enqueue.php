@@ -34,7 +34,9 @@ add_action('wp_head', function () {
     $btn_accept_text = get_option('smart_btn_accept_text',    '#ffffff');
     $btn_reject_bg   = get_option('smart_btn_reject_bg',      '#ffffff');
     $btn_reject_text = get_option('smart_btn_reject_text',    '#0073aa');
-    $trigger_bg      = get_option('smart_trigger_bg',         '#0073aa');
+    $trigger_bg           = get_option('smart_trigger_bg',            '#0073aa');
+    $trigger_icon_color   = get_option('smart_trigger_icon_color',    '#ffffff');
+    $banner_icon_color    = get_option('smart_banner_icon_color',     '#4a1050');
     ?>
     <style>
         :root {
@@ -45,8 +47,10 @@ add_action('wp_head', function () {
             --scp-btn-accept-text: <?php echo esc_attr($btn_accept_text); ?>;
             --scp-btn-reject-bg:   <?php echo esc_attr($btn_reject_bg); ?>;
             --scp-btn-reject-text: <?php echo esc_attr($btn_reject_text); ?>;
-            --scp-trigger-bg:      <?php echo esc_attr($trigger_bg); ?>;
-            --scp-trigger-color:   #ffffff;
+            --scp-trigger-bg:          <?php echo esc_attr($trigger_bg); ?>;
+            --scp-trigger-color:       <?php echo esc_attr($trigger_icon_color); ?>;
+            --scp-trigger-icon-color:  <?php echo esc_attr($trigger_icon_color); ?>;
+            --scp-icon-color:          <?php echo esc_attr($banner_icon_color); ?>;
         }
     </style>
 

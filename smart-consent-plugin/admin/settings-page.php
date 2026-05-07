@@ -80,6 +80,8 @@ add_action('admin_init', function () {
         'smart_btn_reject_text',
         'smart_trigger_position',
         'smart_trigger_bg',
+        'smart_trigger_icon_color',
+        'smart_banner_icon_color',
     ];
     foreach ($options as $opt) {
         register_setting('smart_consent_group', $opt);
@@ -323,8 +325,12 @@ add_action('admin_init', function () {
         'smart-consent', 'smart_banner_design_section'
     );
 
-    add_settings_field('smart_trigger_bg', 'Botón galleta — color de fondo',
-        function () use ($color_field) { $color_field('smart_trigger_bg', '#0073aa'); },
+    add_settings_field('smart_trigger_bg',
+        'smart_trigger_icon_color',
+        'smart_banner_icon_color', 'Botón galleta — color de fondo',
+        function () use ($color_field) { $color_field('smart_trigger_bg',
+        'smart_trigger_icon_color',
+        'smart_banner_icon_color', '#0073aa'); },
         'smart-consent', 'smart_banner_design_section'
     );
 });

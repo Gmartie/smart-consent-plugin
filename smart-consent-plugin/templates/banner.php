@@ -1,7 +1,7 @@
 <?php
 $banner_text = get_option('smart_banner_text', '');
 if (empty($banner_text)) {
-    $banner_text = 'Usamos cookies para mejorar la experiencia.';
+    $banner_text = 'Para ofrecerle la mejor experiencia en nuestro sitio web, utilizamos cookies o tecnologías similares. Seleccione un nivel de acceso a los datos para decidir para qué fines podemos utilizar y compartir sus datos.';
 }
 
 $links_raw = get_option('smart_banner_links', '');
@@ -15,48 +15,59 @@ if (!empty($links_raw)) {
 
 $trigger_position  = get_option('smart_trigger_position', 'left');
 $trigger_pos_class = ($trigger_position === 'right') ? 'scp-trigger--right' : 'scp-trigger--left';
+
+// Dactilar SVG path (shared between trigger and banner card icon)
+$dactilar_path = 'M184.49,89.73c-1.15-.44-2.45-.12-3.26.79-6.54,7.34-14.68,5.87-20.36,3.36-3.91-1.72-6.65-3.96-6.9-4.17-4.87-4.22-6.21-9.12-5.95-13.68.17-3.04,1.05-5.93,2.1-8.35,1.65-3.81,3.68-6.48,3.89-6.75.04-.04.05-.1.07-.13.71-1.01.73-2.36.02-3.39-.33-.46-.78-.79-1.3-1.01-.64-.27-1.36-.34-2.05-.11-.18.06-1.78.56-4.14.78-1.83.17-4.13.17-6.58-.35-3.8-.81-7.97-2.86-11.35-7.43-3.77-5.12-3.57-9.89-2.26-13.53.84-2.34,2.14-4.22,3.14-5.45.76-.93,1.36-1.49,1.45-1.58,1-.89,1.27-2.35.66-3.53-.6-1.2-1.93-1.83-3.25-1.55-.06.01-2.6.53-6.09.77-4.71.33-11.13.18-15.55-2.37-3.81-2.2-5.99-5.04-7.24-7.79-2.24-4.95-1.42-9.65-1.37-9.94.16-.79-.01-1.61-.48-2.27-.46-.66-1.17-1.1-1.98-1.22-.97-.15-1.89-.24-2.82-.35-4.1-.46-7.89-.55-11.3-.38-1.54.07-2.98.22-4.38.38-4.84.57-8.72,1.6-11.48,2.53-5.05,1.47-9.85,3.39-14.3,5.65-.57.24-2.54,1.12-5.44,2.91-.53.33-1.09.68-1.66,1.06-.62.77-.92,1.8-.66,2.84.43,1.74,2.18,2.79,3.91,2.36.06-.01.11-.05.17-.06.53-.35,1.03-.67,1.49-.97,2.81-1.76,4.55-2.49,4.61-2.53.09-.04.17-.07.24-.11,2.65-1.36,5.44-2.58,8.35-3.64.68-.26,1.38-.49,2.08-.72,5.44-1.82,11.25-3.04,17.23-3.52,2.62-.21,5.27-.27,7.95-.17.77.06,1.53.11,2.32.2-.02.78,0,1.61.07,2.49.11,1.37.37,2.82.77,4.33-7.32-.86-14.9-.44-22.45,1.42-.31.07-.62.16-.94.24C35.32,23.74,14.98,59.09,24.06,93.73c7.3,27.84,19.81,49.64,35.03,66.58.13.15.26.29.38.44.48.53.95,1.04,1.43,1.55.2.21.4.42.6.64,3.85,4.05,7.67,7.65,11.36,10.84,1.15.98,2.29,1.96,3.45,2.9h-.02c.79.65,1.56,1.26,2.35,1.87-4.91-.83-9.68-2.07-14.28-3.68-.05-.04-.09-.07-.13-.1-4.82-2.97-14.39-15.01-17.65-19.4-1.03-1.38-2.98-1.66-4.36-.64-1.38,1.03-1.66,2.98-.64,4.36.56.76,3.09,4.12,6.33,8.01C22.72,151.78,5.88,124.07,5.88,92.51c0-25.96,11.44-50.38,31.38-67.03,1.26-1.05,1.42-2.91.38-4.17-1.05-1.26-2.91-1.42-4.17-.38-6.27,5.23-11.72,11.2-16.35,17.72C6.1,54.2,0,72.93,0,92.5c0,39.92,25.23,74.04,60.58,87.29.68.26,1.38.5,2.08.73,8.09,2.81,16.69,4.56,25.63,5.04,1.34.07,2.69.1,4.05.11.29,0,.57.02.86.02,2.3,0,4.58-.1,6.85-.26,3.59-.23,7.13-.65,10.61-1.26,3.11-.54,6.17-1.22,9.18-2.04,3.22-.88,6.38-1.92,9.46-3.12,2.75-1.08,5.44-2.27,8.06-3.61,2.59-1.31,5.11-2.75,7.56-4.29,2.19-1.39,4.3-2.89,6.36-4.45s4.05-3.24,5.95-4.99c.62-.57,1.25-1.12,1.86-1.71,1.17-1.14,2.32-2.32,3.42-3.52,1.65-1.78,3.19-3.66,4.68-5.56,1.41-1.82,2.75-3.68,4.02-5.6,1.22-1.85,2.35-3.75,3.42-5.7s2.09-3.91,3.03-5.94c2.1-4.56,3.81-9.33,5.17-14.27,2.34-8.52,3.58-17.54,3.58-26.88-.01-1.23-.77-2.32-1.92-2.76h0ZM30,92.18c-8.22-31.33,10.18-63.32,41.1-71.43.28-.07.56-.15.84-.22,8.09-1.99,16.22-2.14,23.96-.73,1.32,2.01,3.07,3.91,5.32,5.61.82.61,1.67,1.21,2.63,1.76,4.87,2.81,11.21,3.4,16.41,3.26.73-.01,1.44-.05,2.13-.1-.22.4-.44.82-.64,1.25-2.48,5.2-3.42,12.05.86,19.21.4.66.83,1.33,1.32,2.01,1.33,1.81,2.79,3.31,4.32,4.57,4.35,3.61,9.3,5.16,13.78,5.59,1.27.12,2.51.16,3.67.11-.77,1.52-1.47,3.18-2.04,4.91-1.12,3.39-1.77,7.12-1.49,10.89.39,5.29,2.62,10.69,7.96,15.33,6.06,5.06,19.05,11.39,30.14,4.76-.79,12.2-3.83,23.71-8.88,34.01-3.47-.46-7.4-1.16-11.59-2.2-.37-.17-.77-.28-1.19-.29-.31-.01-.61,0-.92.07-1.7.42-2.74,2.14-2.32,3.84.23.94.87,1.67,1.69,2.08.39.2.83.31,1.28.33,3.52.87,6.85,1.5,9.92,1.98-1.12,1.89-2.31,3.75-3.58,5.55-24.66-4.24-44.34-15.31-58.63-33.09-13.69-17.03-17.1-34.22-17.15-34.45-.31-1.65-1.91-2.74-3.56-2.43-1.64.31-2.74,1.89-2.43,3.56.15.75,3.63,18.67,18.2,36.91,10.65,13.34,29.07,28.78,59.42,34.89-1.54,1.83-3.18,3.59-4.89,5.29-4.78-1.12-9.87-2.6-15.09-4.56-4.4-1.65-8.61-3.53-12.62-5.62-.32-.26-.68-.45-1.08-.57-.53-.16-1.1-.2-1.67-.05-1.7.42-2.74,2.14-2.32,3.85.15.6.46,1.12.89,1.52.43.4.95.68,1.54.81,4.19,2.18,8.58,4.13,13.18,5.86,4,1.49,7.9,2.7,11.69,3.73-1.98,1.64-4.03,3.18-6.15,4.62-1.19.81-2.4,1.59-3.63,2.34-3.51,2.14-7.19,4.02-11,5.64-38.82-15.43-64.98-45.35-75.79-86.55-4.76-18.14,5.89-36.66,23.8-41.36.16-.05.33-.09.49-.12,17.74-4.38,35.82,6.48,40.54,24.45,5.33,20.33,17.35,33.74,36.75,41,1.86.7,3.69,1.3,5.5,1.83.32.1.62.17.93.26.35.04.71.02,1.08-.06,1.66-.42,2.67-2.1,2.25-3.78-.24-.98-.93-1.74-1.78-2.12-.29-.09-.59-.16-.88-.24-1.65-.49-3.33-1.04-5.01-1.66-17.63-6.6-28.09-18.29-32.94-36.77-5.56-21.25-26.93-34.07-47.9-28.9-.2.05-.39.1-.57.15-21.17,5.55-33.77,27.43-28.14,48.87,12.37,47.15,42.44,73.92,73.4,88.06-3,.93-6.06,1.71-9.18,2.34-11.71-6.05-23.13-13.91-33.43-24.01-.17-.21-.35-.39-.56-.55-.72-.56-1.67-.81-2.62-.57-1.66.42-2.68,2.12-2.25,3.79.1.42.28.78.51,1.11.23.22.46.44.7.67,8.61,8.42,17.97,15.34,27.62,21-2.86.26-5.76.39-8.68.39-.79,0-1.58-.04-2.37-.06-26.47-17.76-49.81-45.52-60.82-87.52h0Z';
 ?>
 
-<!-- Botón flotante de galleta — siempre visible -->
+<!-- Botón flotante dactilar — siempre visible -->
 <button id="scp-cookie-trigger"
         class="scp-cookie-trigger <?php echo esc_attr($trigger_pos_class); ?>"
         aria-label="Gestionar preferencias de cookies"
         title="Gestionar cookies">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="26" height="26" fill="currentColor" aria-hidden="true">
-        <circle cx="32" cy="32" r="30"/>
-        <circle cx="22" cy="22" r="4"   fill="rgba(0,0,0,0.25)"/>
-        <circle cx="38" cy="18" r="3"   fill="rgba(0,0,0,0.25)"/>
-        <circle cx="44" cy="32" r="4"   fill="rgba(0,0,0,0.25)"/>
-        <circle cx="28" cy="38" r="3.5" fill="rgba(0,0,0,0.25)"/>
-        <circle cx="18" cy="40" r="3"   fill="rgba(0,0,0,0.25)"/>
-        <circle cx="40" cy="46" r="3"   fill="rgba(0,0,0,0.25)"/>
-        <path d="M54 18 Q64 8 58 2 Q52 10 44 12 Q46 20 54 18Z" fill="white"/>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 185.91" width="26" height="26" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="<?php echo $dactilar_path; ?>"/>
     </svg>
 </button>
 
-<!-- Banner de consentimiento -->
-<div id="scp-consent-banner">
-    <div class="scp-banner-inner">
-        <div class="scp-banner-content">
-            <p class="scp-banner-title">Privacidad y cookies</p>
-            <p class="scp-banner-message"><?php echo wp_kses_post($banner_text); ?></p>
-            <?php if (!empty($links)) : ?>
-            <div class="scp-banner-links">
-                <?php foreach ($links as $link) :
-                    if (empty($link['url']) || empty($link['label'])) continue;
-                ?>
-                <a href="<?php echo esc_url($link['url']); ?>"
-                   target="_blank" rel="noopener noreferrer"
-                   class="scp-banner-link">
-                    <?php echo esc_html($link['label']); ?>
-                </a>
-                <?php endforeach; ?>
+<!-- Banner de consentimiento — tarjeta centrada -->
+<div id="scp-consent-banner" role="dialog" aria-modal="true" aria-label="Preferencias de privacidad">
+    <div class="scp-banner-card">
+
+        <!-- Cabecera con icono dactilar -->
+        <div class="scp-banner-header">
+            <div class="scp-banner-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 185.91" fill="currentColor">
+                    <path fill-rule="evenodd" d="<?php echo $dactilar_path; ?>"/>
+                </svg>
             </div>
-            <?php endif; ?>
+            <div class="scp-banner-titles">
+                <p class="scp-banner-title">Creemos que sus datos son de su propiedad y respaldamos su derecho a la privacidad y a la transparencia.</p>
+            </div>
         </div>
+
+        <!-- Mensaje -->
+        <p class="scp-banner-message"><?php echo wp_kses_post($banner_text); ?></p>
+
+        <?php if (!empty($links)) : ?>
+        <div class="scp-banner-links">
+            <?php foreach ($links as $link) :
+                if (empty($link['url']) || empty($link['label'])) continue;
+            ?>
+            <a href="<?php echo esc_url($link['url']); ?>"
+               target="_blank" rel="noopener noreferrer"
+               class="scp-banner-link">
+                <?php echo esc_html($link['label']); ?>
+            </a>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+
+        <!-- Acciones -->
         <div class="scp-banner-actions">
-            <button id="accept-cookies" class="scp-btn scp-btn-accept">Aceptar</button>
+            <button id="accept-cookies" class="scp-btn scp-btn-accept">Guardar mis preferencias</button>
             <button id="reject-cookies" class="scp-btn scp-btn-reject">Rechazar</button>
         </div>
+
     </div>
 </div>
