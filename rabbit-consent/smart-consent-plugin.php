@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Smart Consent Tracker
+ * Plugin Name: Rabbit Consent
  * Description: Gestión de consentimiento de cookies compatible con Google Consent Mode v2. Integra GTM y GA4 de forma nativa, sin dependencias externas.
- * Version: 3.0.0
+ * Version: demo 4
  * Author: Gabriel
  */
 

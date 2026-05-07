@@ -40,7 +40,9 @@ add_action('wp_head', function () {
     $btn_reject_hover_txt = get_option('smart_btn_reject_hover_text',   '#0073aa');
     $trigger_bg           = get_option('smart_trigger_bg',              '#0073aa');
     $trigger_icon_color   = get_option('smart_trigger_icon_color',      '#ffffff');
-    $banner_icon_color    = get_option('smart_banner_icon_color',       '#4a1050');
+    $banner_icon_color         = get_option('smart_banner_icon_color',       '#4a1050');
+    $trigger_hover_bg          = get_option('smart_trigger_hover_bg',         '#005a87');
+    $trigger_hover_icon_color  = get_option('smart_trigger_hover_icon_color', '#ffffff');
     ?>
     <style>
         :root {
@@ -59,6 +61,8 @@ add_action('wp_head', function () {
             --scp-trigger-color:         <?php echo esc_attr($trigger_icon_color); ?>;
             --scp-trigger-icon-color:    <?php echo esc_attr($trigger_icon_color); ?>;
             --scp-icon-color:            <?php echo esc_attr($banner_icon_color); ?>;
+            --scp-trigger-hover-bg:      <?php echo esc_attr($trigger_hover_bg); ?>;
+            --scp-trigger-hover-icon:    <?php echo esc_attr($trigger_hover_icon_color); ?>;
         }
     </style>
 
