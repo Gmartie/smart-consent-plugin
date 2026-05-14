@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Rabbit Consent
  * Description: Gestión de consentimiento de cookies compatible con Google Consent Mode v2. Integra GTM y GA4 de forma nativa, sin dependencias externas.
- * Version: demo 4
+ * Version: release
  * Author: Gabriel
  */
 
