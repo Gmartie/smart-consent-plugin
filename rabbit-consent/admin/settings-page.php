@@ -21,8 +21,16 @@ function smart_consent_settings_page() {
     $gtm_id = trim(get_option('smart_gtm_id', ''));
     $ga4_id = trim(get_option('smart_ga4_id', ''));
     ?>
-    <div class="wrap">
-        <h1>Rabbit Consent Settings</h1>
+    <div class="wrap rabbit-consent-wrap">
+
+        <!-- CABECERA -->
+        <div class="rabbit-consent-header">
+            <img src="<?php echo esc_url(plugin_dir_url(dirname(__FILE__)) . 'WhiteRabbitConsentLogo.svg'); ?>" alt="Rabbit Consent" class="rabbit-consent-logo">
+            <div class="rabbit-consent-header-text">
+                <h1>Rabbit Consent</h1>
+                <p class="rabbit-consent-subtitle">Plugin de cookies · RGPD · GTM &amp; GA4 · Banner personalizable · Gestión de consentimiento</p>
+            </div>
+        </div>
 
         <?php if (empty($gtm_id) && empty($ga4_id)) : ?>
         <div class="notice notice-warning">
@@ -56,6 +64,454 @@ function smart_consent_settings_page() {
             submit_button();
             ?>
         </form>
+
+    <!-- ASISTENTE RABBIT CONSENT -->
+    <div id="rabbit-consent-assistant" class="rabbit-consent-assistant-bubble" title="Ayuda Rabbit Consent">
+        <img src="<?php echo esc_url(plugin_dir_url(dirname(__FILE__)) . 'WhiteRabbitConsentLogo.svg'); ?>" alt="Ayuda" width="30" height="30">
+    </div>
+
+    <div id="rabbit-consent-chat-panel" class="rabbit-consent-chat-panel" style="display:none">
+        <div class="rabbit-consent-chat-header">
+            <span>Rabbit Consent — Ayuda</span>
+            <button id="rabbit-consent-chat-close" class="rabbit-consent-chat-close">✕</button>
+        </div>
+        <div id="rabbit-consent-chat-messages" class="rabbit-consent-chat-messages"></div>
+    </div>
+
+    <style>
+    /* ── Cabecera ────────────────────────────────────────────────────────── */
+    .rabbit-consent-wrap {
+        max-width: 100%;
+        padding-right: 20px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .rabbit-consent-header {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        margin: 20px 0 28px;
+        padding: 20px 24px;
+        background: #fff;
+        border-radius: 10px;
+        border-left: 5px solid #1d2327;
+        box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    }
+    .rabbit-consent-logo {
+        width: 64px;
+        height: 64px;
+        flex-shrink: 0;
+        filter: invert(1);
+    }
+    .rabbit-consent-header-text h1 {
+        margin: 0 0 4px;
+        font-size: 1.7rem;
+        color: #1d2327;
+    }
+    .rabbit-consent-subtitle {
+        margin: 0;
+        color: #666;
+        font-size: .92rem;
+    }
+
+    /* ── Burbuja asistente ───────────────────────────────────────────────── */
+    .rabbit-consent-assistant-bubble {
+        position: fixed;
+        bottom: 28px;
+        right: 28px;
+        width: 58px;
+        height: 58px;
+        background: #1d2327;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 18px rgba(0,0,0,.35);
+        z-index: 99999;
+        transition: transform .2s, box-shadow .2s;
+    }
+    .rabbit-consent-assistant-bubble:hover {
+        transform: scale(1.08);
+        box-shadow: 0 6px 24px rgba(0,0,0,.45);
+    }
+    .rabbit-consent-assistant-bubble img { filter: brightness(10); }
+
+    /* ── Panel de chat ───────────────────────────────────────────────────── */
+    .rabbit-consent-chat-panel {
+        position: fixed;
+        bottom: 96px;
+        right: 28px;
+        width: 340px;
+        max-height: 520px;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 8px 32px rgba(0,0,0,.18);
+        z-index: 99998;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid #ddd;
+    }
+    .rabbit-consent-chat-header {
+        background: #1d2327;
+        color: #fff;
+        padding: 12px 16px;
+        font-weight: 600;
+        font-size: .9rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+    }
+    .rabbit-consent-chat-close {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 1rem;
+        cursor: pointer;
+        padding: 0 4px;
+        line-height: 1;
+    }
+    .rabbit-consent-chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .rc-msg {
+        max-width: 92%;
+        padding: 9px 13px;
+        border-radius: 12px;
+        font-size: .84rem;
+        line-height: 1.55;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+    .rc-msg-bot {
+        background: #f0f4f8;
+        color: #1d2327;
+        align-self: flex-start;
+        border-bottom-left-radius: 3px;
+    }
+    .rc-msg-user {
+        background: #1d2327;
+        color: #fff;
+        align-self: flex-end;
+        border-bottom-right-radius: 3px;
+        font-size: .82rem;
+    }
+    .rc-opts {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        align-self: stretch;
+    }
+    .rc-opt-btn {
+        background: #fff;
+        border: 1px solid #2271b1;
+        border-radius: 8px;
+        color: #2271b1;
+        padding: 7px 11px;
+        font-size: .82rem;
+        text-align: left;
+        cursor: pointer;
+        transition: background .13s, color .13s;
+        line-height: 1.4;
+    }
+    .rc-opt-btn:hover:not(:disabled) {
+        background: #1d2327;
+        color: #fff;
+    }
+    .rc-opt-btn:disabled {
+        cursor: default;
+        opacity: .45;
+        border-color: #ccc;
+        color: #999;
+    }
+    .rc-opt-btn.rc-opt-chosen {
+        background: #f0f4f8;
+        border-color: #2271b1;
+        color: #2271b1;
+        opacity: 1;
+        font-weight: 600;
+    }
+    </style>
+
+    <script>
+    (function() {
+        // ── Árbol de conversación ─────────────────────────────────────────
+        var TREE = {
+            start: {
+                bot: '¡Hola! Soy Rabbit. ¿En qué puedo ayudarte con el plugin de cookies?',
+                opts: [
+                    { label: '¿Qué hace este plugin?',                  next: 'overview'        },
+                    { label: 'El banner no aparece en mi web',           next: 'err_banner'      },
+                    { label: 'Cómo conectar con GTM o GA4',             next: 'gtm_ga4'         },
+                    { label: 'El consentimiento no se guarda',          next: 'err_consent'     },
+                    { label: 'Configurar los textos del banner',        next: 'config_texto'    },
+                    { label: 'Personalizar los colores del banner',     next: 'config_colores'  },
+                    { label: 'Cumplimiento RGPD / legalidad',           next: 'rgpd'            },
+                    { label: 'Problemas con el botón flotante',         next: 'err_trigger'     },
+                ]
+            },
+
+            // ── Visión general ────────────────────────────────────────────
+            overview: {
+                bot: 'Rabbit Consent es un plugin de gestión de consentimiento de cookies para WordPress:\n\n🍪 Muestra un banner de cookies personalizable al visitar la web.\n✅ El visitante puede Aceptar o Rechazar cookies.\n📊 Integra con Google Tag Manager (GTM) y GA4 para disparar analítica solo con consentimiento.\n🎨 Colores, textos y posición del banner 100% configurables.\n🔁 El visitante puede cambiar su elección en cualquier momento con el botón flotante.\n⚖️ Diseñado para cumplir con el RGPD y la LSSI.',
+                opts: [
+                    { label: 'Cómo conectar con GTM o GA4',     next: 'gtm_ga4'        },
+                    { label: 'Configurar el texto del banner',   next: 'config_texto'   },
+                    { label: 'Personalizar colores',             next: 'config_colores' },
+                    { label: '← Volver al inicio',               next: 'start'          },
+                ]
+            },
+
+            // ── GTM y GA4 ─────────────────────────────────────────────────
+            gtm_ga4: {
+                bot: '¿Qué sistema de analítica vas a usar?',
+                opts: [
+                    { label: 'Google Tag Manager (GTM)',   next: 'gtm_detail'  },
+                    { label: 'GA4 directo (sin GTM)',      next: 'ga4_detail'  },
+                    { label: 'Tengo los dos activos',      next: 'gtm_ga4_dos' },
+                    { label: '← Volver al inicio',          next: 'start'      },
+                ]
+            },
+
+            gtm_detail: {
+                bot: 'Para conectar con Google Tag Manager:\n\n1. Ve a la pestaña Configuración del plugin.\n2. En "Integración con Google", introduce tu GTM Container ID (ej: GTM-XXXXXX).\n3. Guarda los cambios.\n4. En GTM, crea una etiqueta de GA4 con un trigger que se active cuando consent_status sea "accepted".\n\nCuando el usuario acepta, el plugin dispara el evento consent_update con el parámetro consent_status: "accepted".',
+                opts: [
+                    { label: 'GTM activo pero los eventos no llegan', next: 'err_gtm_eventos' },
+                    { label: '¿Cómo crear el trigger en GTM?',        next: 'gtm_trigger'    },
+                    { label: '← Volver al inicio',                     next: 'start'          },
+                ]
+            },
+
+            ga4_detail: {
+                bot: 'Para conectar con GA4 directamente (sin GTM):\n\n1. Ve a Configuración → Integración con Google.\n2. Introduce tu GA4 Measurement ID (ej: G-XXXXXXXXXX).\n3. Deja vacío el campo GTM.\n4. Guarda.\n\nEl plugin solo enviará el evento consent_update a GA4 cuando el usuario haya dado su consentimiento.',
+                opts: [
+                    { label: 'GA4 activo pero no veo eventos', next: 'err_ga4_eventos' },
+                    { label: '← Volver al inicio',              next: 'start'           },
+                ]
+            },
+
+            gtm_ga4_dos: {
+                bot: 'Si tienes GTM y GA4 configurados a la vez:\n\n⚠️ GTM tiene PRIORIDAD — el plugin ignora el GA4 Measurement ID cuando hay un GTM Container ID activo.\n\nRecomendación:\n• Usa GTM y configura GA4 como etiqueta dentro de GTM.\n• Deja vacío el campo GA4 Measurement ID para evitar duplicados.',
+                opts: [
+                    { label: '← Volver al inicio',  next: 'start' },
+                ]
+            },
+
+            gtm_trigger: {
+                bot: 'Para crear el trigger de consentimiento en GTM:\n\n1. En GTM, ve a Activadores → Nuevo.\n2. Tipo: Evento personalizado.\n3. Nombre del evento: consent_update\n4. Condición: {{Event}} contiene "consent_update" AND {{DLV - consent_status}} equals "accepted".\n5. Asigna este activador a tu etiqueta de GA4.\n\nAsegúrate de tener creada la variable de capa de datos "consent_status".',
+                opts: [
+                    { label: '← Volver al inicio',  next: 'start' },
+                ]
+            },
+
+            err_gtm_eventos: {
+                bot: 'Si GTM está activo pero los eventos no llegan:\n\n1. Abre GTM en modo Preview y acepta las cookies en tu web.\n2. Comprueba que el evento "consent_update" aparece en el panel de Preview.\n3. Si no aparece: verifica que el Container ID es correcto (GTM-XXXXXX).\n4. Si aparece pero no se dispara la etiqueta: revisa el trigger — el parámetro consent_status debe valer "accepted".\n5. Comprueba en la consola del navegador que no hay errores JS.',
+                opts: [
+                    { label: '¿Cómo crear el trigger?',   next: 'gtm_trigger' },
+                    { label: '← Volver al inicio',         next: 'start'       },
+                ]
+            },
+
+            err_ga4_eventos: {
+                bot: 'Si GA4 no recibe eventos:\n\n1. Verifica el Measurement ID: debe empezar por G- (ej: G-XXXXXXXXXX).\n2. Acepta las cookies en tu web y espera 1-2 minutos.\n3. En GA4, abre Informes → Tiempo real y comprueba si llega el evento consent_update.\n4. Si no llega, abre la consola del navegador (F12 → Consola) y busca errores.\n5. Asegúrate de que no tienes un bloqueador de anuncios activo al hacer la prueba.',
+                opts: [
+                    { label: '← Volver al inicio',  next: 'start' },
+                ]
+            },
+
+            // ── Banner no aparece ─────────────────────────────────────────
+            err_banner: {
+                bot: '¿En qué situación no aparece el banner?',
+                opts: [
+                    { label: 'Nunca aparece en ninguna página',    next: 'err_banner_never'   },
+                    { label: 'Aparecía y dejó de aparecer',        next: 'err_banner_stopped' },
+                    { label: 'Solo no aparece en algunas páginas', next: 'err_banner_pages'   },
+                    { label: '← Volver al inicio',                  next: 'start'             },
+                ]
+            },
+
+            err_banner_never: {
+                bot: 'Si el banner nunca ha aparecido:\n\n1. Ve a Ajustes → Rabbit Consent y asegúrate de que el plugin está guardado correctamente.\n2. Abre tu web en una pestaña de incógnito (sin cookies previas).\n3. Comprueba que el archivo banner.php y banner.css están cargados (F12 → Red).\n4. Revisa que el plugin está activo en Plugins → Plugins instalados.\n5. Prueba a desactivar otros plugins de caché y recarga.',
+                opts: [
+                    { label: 'El archivo CSS/JS no carga',  next: 'err_assets'  },
+                    { label: '← Volver al inicio',           next: 'start'      },
+                ]
+            },
+
+            err_banner_stopped: {
+                bot: 'Si el banner dejó de aparecer:\n\n• El visitante aceptó o rechazó cookies y la preferencia se guardó en una cookie.\n• Para volver a verlo: abre la consola (F12), ve a Aplicación → Cookies y elimina la cookie "smart_consent".\n• También puedes usar una pestaña de incógnito para simular un usuario nuevo.\n• Si en incógnito tampoco aparece, puede haber un conflicto de caché — vacía la caché del servidor.',
+                opts: [
+                    { label: '← Volver al inicio',  next: 'start' },
+                ]
+            },
+
+            err_banner_pages: {
+                bot: 'Si el banner no aparece en algunas páginas:\n\n• Verifica que esas páginas no tienen el plugin de caché sirviendo una versión sin el banner.\n• Comprueba si el tema de esa página llama a wp_footer() — el banner se inyecta allí.\n• Si usas un page builder (Elementor, Divi...) en modo mantenimiento, puede que el banner esté bloqueado.',
+                opts: [
+                    { label: '← Volver al inicio',  next: 'start' },
+                ]
+            },
+
+            err_assets: {
+                bot: 'Si los archivos CSS o JS del banner no cargan:\n\n1. Ve a Ajustes → Enlaces permanentes y haz clic en "Guardar cambios" (regenera .htaccess).\n2. Desactiva plugins de optimización/minificación (Autoptimize, W3 Total Cache...) y prueba.\n3. Comprueba que la carpeta del plugin tiene permisos de lectura (755).\n4. Si usas CDN, purga la caché del CDN.',
+                opts: [
+                    { label: '← Volver al inicio',  next: 'start' },
+                ]
+            },
+
+            // ── Consentimiento no se guarda ───────────────────────────────
+            err_consent: {
+                bot: 'Si el consentimiento no se guarda (el banner aparece en cada visita):\n\n• El consentimiento se guarda en una cookie de navegador llamada "smart_consent".\n• Si el navegador bloquea cookies de terceros o está en modo privado, puede no persistir.\n• Comprueba que tu web no tiene una directiva que bloquee cookies propias.\n• Si usas un plugin de seguridad, asegúrate de que no limpia las cookies en cada visita.',
+                opts: [
+                    { label: '← Volver al inicio',  next: 'start' },
+                ]
+            },
+
+            // ── Configurar textos ─────────────────────────────────────────
+            config_texto: {
+                bot: 'Para configurar el texto del banner:\n\n1. Ve a Rabbit Consent Settings → sección "Configuración General".\n2. Edita el campo "Texto del banner de cookies" con tu aviso legal personalizado.\n3. Añade los enlaces de Política de cookies y Política de privacidad en el campo "Enlaces legales".\n4. Guarda los cambios.\n\nEl texto acepta HTML básico para negritas, enlaces, etc.',
+                opts: [
+                    { label: '¿Cómo añadir enlaces a la política?', next: 'config_links'   },
+                    { label: '← Volver al inicio',                   next: 'start'          },
+                ]
+            },
+
+            config_links: {
+                bot: 'Para añadir los enlaces legales al banner:\n\n1. En "Enlaces legales", haz clic en "Añadir enlace".\n2. Introduce el texto del enlace (ej: "Política de cookies") y la URL de la página.\n3. Repite para cada enlace que quieras mostrar.\n4. Los enlaces aparecerán en el footer del banner.\n\nPuedes añadir varios enlaces: política de cookies, privacidad, aviso legal...',
+                opts: [
+                    { label: '← Volver al inicio',  next: 'start' },
+                ]
+            },
+
+            // ── Configurar colores ────────────────────────────────────────
+            config_colores: {
+                bot: 'Para personalizar los colores del banner:\n\nEn la sección "Diseño del banner" puedes configurar:\n\n🎨 Color de fondo del banner\n🔤 Color del texto\n✅ Botón Aceptar: fondo, texto y hover\n❌ Botón Rechazar: fondo, texto y hover\n🔵 Botón flotante (trigger): fondo y color del icono\n\nTodos los colores se eligen con el selector de color integrado.',
+                opts: [
+                    { label: 'Qué icono tiene el botón flotante', next: 'config_icono'   },
+                    { label: '← Volver al inicio',                 next: 'start'         },
+                ]
+            },
+
+            config_icono: {
+                bot: 'El botón flotante que permite reabrir el panel de cookies tiene dos opciones de icono:\n\n🐇 Conejo (White Rabbit) — el logo del plugin.\n🖐 Dactilar (huella) — icono de huella dactilar minimalista.\n\nPuedes elegirlo en Diseño del banner → "Icono del banner".\nTambién puedes cambiar el color del icono dactilar con el selector de color.',
+                opts: [
+                    { label: '← Volver al inicio',  next: 'start' },
+                ]
+            },
+
+            // ── RGPD ──────────────────────────────────────────────────────
+            rgpd: {
+                bot: 'Notas sobre cumplimiento RGPD con Rabbit Consent:\n\n⚖️ El plugin bloquea las etiquetas de analítica hasta que el usuario da su consentimiento explícito.\n✅ El consentimiento se registra antes de que se cargue GTM o se envíe cualquier evento a GA4.\n❌ Si el usuario rechaza, no se dispara ningún evento de analítica.\n🔁 El usuario puede cambiar su decisión en cualquier momento usando el botón flotante.\n\nNota: Rabbit Consent gestiona el consentimiento técnico. Para cumplimiento legal completo consulta a un abogado especializado en privacidad.',
+                opts: [
+                    { label: '¿Dónde se guarda el consentimiento?', next: 'rgpd_storage'  },
+                    { label: '← Volver al inicio',                   next: 'start'         },
+                ]
+            },
+
+            rgpd_storage: {
+                bot: 'El consentimiento se almacena en una cookie propia del navegador:\n\n• Nombre: smart_consent\n• Valores posibles: "accepted" o "rejected"\n• Duración: 365 días (1 año)\n• Tipo: cookie propia (first-party), no rastreadora\n\nEsta cookie es necesaria para recordar la elección del usuario y no volver a mostrar el banner en cada visita.',
+                opts: [
+                    { label: '← Volver al inicio',  next: 'start' },
+                ]
+            },
+
+            // ── Botón flotante ────────────────────────────────────────────
+            err_trigger: {
+                bot: '¿Cuál es el problema con el botón flotante?',
+                opts: [
+                    { label: 'El botón no aparece en la web',           next: 'err_trigger_missing'  },
+                    { label: 'El botón tapa contenido importante',      next: 'err_trigger_pos'      },
+                    { label: 'Al pulsar el botón no se abre el banner', next: 'err_trigger_click'    },
+                    { label: '← Volver al inicio',                       next: 'start'               },
+                ]
+            },
+
+            err_trigger_missing: {
+                bot: 'Si el botón flotante no aparece:\n\n• Comprueba que los archivos CSS y JS del plugin están cargando (F12 → Red).\n• El botón aparece solo después de que el usuario haya dado una respuesta al banner (acepta o rechaza).\n• Si el usuario nunca ha interactuado, el botón no es visible para no saturar el diseño.\n• Para verlo: acepta las cookies en tu web y el botón flotante quedará visible.',
+                opts: [
+                    { label: '← Volver al inicio',  next: 'start' },
+                ]
+            },
+
+            err_trigger_pos: {
+                bot: 'Si el botón flotante tapa contenido:\n\nEn Diseño del banner → "Posición del trigger" puedes elegir la esquina donde aparece:\n• Abajo-derecha (por defecto)\n• Abajo-izquierda\n\nElige la posición que no interfiera con el diseño de tu web.',
+                opts: [
+                    { label: '← Volver al inicio',  next: 'start' },
+                ]
+            },
+
+            err_trigger_click: {
+                bot: 'Si al pulsar el botón flotante no se abre el banner:\n\n1. Abre la consola del navegador (F12) y mira si hay errores JavaScript.\n2. Comprueba si otro plugin está bloqueando eventos de clic (jQuery conflicts).\n3. Prueba desactivando plugins de caché y optimización JS.\n4. Asegúrate de que el archivo consent-core.js está cargando correctamente.',
+                opts: [
+                    { label: 'Los archivos JS no cargan',  next: 'err_assets'  },
+                    { label: '← Volver al inicio',          next: 'start'      },
+                ]
+            },
+        };
+
+        // ── UI ────────────────────────────────────────────────────────────
+        var bubble = document.getElementById('rabbit-consent-assistant');
+        var panel  = document.getElementById('rabbit-consent-chat-panel');
+        var msgs   = document.getElementById('rabbit-consent-chat-messages');
+        var close  = document.getElementById('rabbit-consent-chat-close');
+
+        bubble.addEventListener('click', function() {
+            var visible = panel.style.display !== 'none';
+            panel.style.display = visible ? 'none' : 'flex';
+            if (!visible && msgs.children.length === 0) goTo('start');
+        });
+
+        close.addEventListener('click', function() { panel.style.display = 'none'; });
+
+        function addMsg(text, who) {
+            var d = document.createElement('div');
+            d.className = 'rc-msg rc-msg-' + who;
+            d.textContent = text;
+            msgs.appendChild(d);
+            msgs.scrollTop = msgs.scrollHeight;
+            return d;
+        }
+
+        function addOptions(opts) {
+            var wrap = document.createElement('div');
+            wrap.className = 'rc-opts';
+            opts.forEach(function(o) {
+                var b = document.createElement('button');
+                b.className = 'rc-opt-btn';
+                b.textContent = o.label;
+                b.addEventListener('click', function() {
+                    wrap.querySelectorAll('.rc-opt-btn').forEach(function(btn) {
+                        btn.disabled = true;
+                        btn.classList.add('rc-opt-used');
+                    });
+                    b.classList.add('rc-opt-chosen');
+                    addMsg(o.label, 'user');
+                    setTimeout(function() { goTo(o.next); }, 180);
+                });
+                wrap.appendChild(b);
+            });
+            msgs.appendChild(wrap);
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        function goTo(nodeId) {
+            var node = TREE[nodeId];
+            if (!node) return;
+            setTimeout(function() {
+                addMsg(node.bot, 'bot');
+                if (node.opts && node.opts.length) {
+                    setTimeout(function() { addOptions(node.opts); }, 120);
+                }
+            }, 80);
+        }
+    })();
+    </script>
+
     </div>
     <?php
 }
