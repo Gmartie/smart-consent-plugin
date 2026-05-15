@@ -43,6 +43,22 @@ document.addEventListener('DOMContentLoaded', function () {
     var acceptBtn = document.getElementById('accept-cookies');
     var rejectBtn = document.getElementById('reject-cookies');
 
+    // Integrar botón en barra de herramientas si hay selector configurado
+    if (smartSettings.toolbarSelector && smartSettings.toolbarSelector.trim() !== '') {
+        var toolbarEl = document.querySelector(smartSettings.toolbarSelector.trim());
+        if (toolbarEl && trigger) {
+            trigger.classList.remove('scp-pos-left', 'scp-pos-right');
+            trigger.style.position = 'static';
+            trigger.style.bottom   = 'auto';
+            trigger.style.left     = 'auto';
+            trigger.style.right    = 'auto';
+            toolbarEl.appendChild(trigger);
+            if (smartSettings.debug) console.log('[SmartConsent] Botón integrado en:', smartSettings.toolbarSelector);
+        } else if (smartSettings.debug) {
+            console.warn('[SmartConsent] Selector de toolbar no encontrado:', smartSettings.toolbarSelector);
+        }
+    }
+
     // Banner siempre cerrado al cargar — solo se abre con el botón
     closeBanner(banner);
 

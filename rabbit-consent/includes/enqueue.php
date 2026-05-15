@@ -187,7 +187,8 @@ add_action('wp_enqueue_scripts', function () {
         'useGTM'         => $use_gtm  ? 'true' : 'false',
         'useGA4'         => $use_ga4  ? 'true' : 'false',
         'ga4Id'          => esc_js($ga4_id),
-        'cookieExists'   => isset($_COOKIE['smart_consent']) ? 'true' : 'false',
+        'cookieExists'      => isset($_COOKIE['smart_consent']) ? 'true' : 'false',
+        'toolbarSelector'   => get_option('smart_trigger_toolbar_selector', ''),
     ]);
 });
 
