@@ -545,6 +545,8 @@ add_action('admin_init', function () {
         'smart_trigger_hover_bg',
         'smart_trigger_hover_icon_color',
         'smart_banner_icon',
+        'smart_banner_icon_custom_url',
+        'smart_trigger_toolbar_selector',
     ];
     foreach ($options as $opt) {
         register_setting('smart_consent_group', $opt);
@@ -796,14 +798,24 @@ add_action('admin_init', function () {
     );
 
     add_settings_field(
-        'smart_trigger_position', 'Posición del botón de galleta',
+        'smart_trigger_position', 'Posición del botón (modo flotante)',
         function () {
             $value = get_option('smart_trigger_position', 'left');
             echo "<select name='smart_trigger_position'>";
             echo "<option value='left'"  . selected($value, 'left',  false) . ">Abajo a la izquierda</option>";
             echo "<option value='right'" . selected($value, 'right', false) . ">Abajo a la derecha</option>";
             echo "</select>";
-            echo "<p class='description'>Elige en qué esquina aparece el botón flotante con el icono de galleta.</p>";
+            echo "<p class='description'>Solo aplica cuando el botón está en modo flotante (no integrado en toolbar).</p>";
+        },
+        'smart-consent', 'smart_banner_design_section'
+    );
+
+    add_settings_field(
+        'smart_trigger_toolbar_selector', 'Integrar en barra de herramientas existente',
+        function () {
+            $value = get_option('smart_trigger_toolbar_selector', '');
+            echo "<input type='text' name='smart_trigger_toolbar_selector' value='" . esc_attr($value) . "' class='regular-text' placeholder='Ej: .site-header nav, #navbar, header .menu'>";
+            echo "<p class='description'>Selector CSS del elemento donde insertar el botón. Si se rellena, el botón deja de ser flotante y se añade dentro del elemento indicado. Deja vacío para usar el modo flotante habitual.<br><strong>Ejemplos comunes:</strong> <code>.site-header .nav-menu</code>, <code>#primary-menu</code>, <code>header nav</code>, <code>.wp-block-navigation__container</code></p>";
         },
         'smart-consent', 'smart_banner_design_section'
     );
@@ -831,12 +843,59 @@ add_action('admin_init', function () {
     add_settings_field(
         'smart_banner_icon', 'Icono del banner y botón',
         function () {
-            $value = get_option('smart_banner_icon', 'rabbit');
-            echo "<select name='smart_banner_icon'>
-                <option value='rabbit'" . selected($value, 'rabbit', false) . ">Conejo (White Rabbit)</option>
+            $value     = get_option('smart_banner_icon', 'rabbit');
+            $custom_url = get_option('smart_banner_icon_custom_url', '');
+            echo "<select name='smart_banner_icon' id='smart_banner_icon_select'>
+                <option value='rabbit'"   . selected($value, 'rabbit',   false) . ">Conejo (White Rabbit)</option>
                 <option value='dactilar'" . selected($value, 'dactilar', false) . ">Dactilar (huella)</option>
+                <option value='custom'"   . selected($value, 'custom',   false) . ">SVG personalizado (subir)</option>
             </select>";
             echo "<p class='description'>Elige el icono que aparece en el botón flotante y en la cabecera del banner.</p>";
+
+            // Campo de subida de SVG personalizado
+            echo "<div id='smart_custom_svg_wrap' style='margin-top:12px;" . ($value !== 'custom' ? 'display:none' : '') . "'>";
+            echo "<label><strong>URL del SVG personalizado</strong></label><br>";
+            echo "<div style='display:flex;align-items:center;gap:8px;margin-top:4px;'>";
+            echo "<input type='text' name='smart_banner_icon_custom_url' id='smart_banner_icon_custom_url' value='" . esc_attr($custom_url) . "' class='regular-text' placeholder='https://... o selecciona desde la biblioteca'>";
+            echo "<button type='button' class='button' id='smart_svg_upload_btn'>Seleccionar desde biblioteca</button>";
+            echo "</div>";
+            if (!empty($custom_url)) {
+                echo "<div style='margin-top:8px;'><img src='" . esc_url($custom_url) . "' style='max-width:48px;max-height:48px;border:1px solid #ddd;padding:4px;background:#f9f9f9;' alt='Preview'></div>";
+            }
+            echo "<p class='description'>Sube o elige un archivo SVG desde la Biblioteca de medios de WordPress. El archivo debe ser de tipo SVG.</p>";
+            echo "</div>";
+
+            // JS inline para mostrar/ocultar el campo custom y el media uploader
+            echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var sel  = document.getElementById('smart_banner_icon_select');
+                var wrap = document.getElementById('smart_custom_svg_wrap');
+                if (!sel || !wrap) return;
+                sel.addEventListener('change', function() {
+                    wrap.style.display = (this.value === 'custom') ? 'block' : 'none';
+                });
+                // Media uploader
+                var uploadBtn = document.getElementById('smart_svg_upload_btn');
+                if (uploadBtn && typeof wp !== 'undefined' && wp.media) {
+                    var mediaFrame;
+                    uploadBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (mediaFrame) { mediaFrame.open(); return; }
+                        mediaFrame = wp.media({
+                            title: 'Seleccionar SVG personalizado',
+                            button: { text: 'Usar este SVG' },
+                            multiple: false,
+                            library: { type: 'image/svg+xml' }
+                        });
+                        mediaFrame.on('select', function() {
+                            var attachment = mediaFrame.state().get('selection').first().toJSON();
+                            document.getElementById('smart_banner_icon_custom_url').value = attachment.url;
+                        });
+                        mediaFrame.open();
+                    });
+                }
+            });
+            </script>";
         },
         'smart-consent', 'smart_banner_design_section'
     );
