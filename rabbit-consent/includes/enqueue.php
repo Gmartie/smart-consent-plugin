@@ -188,7 +188,7 @@ add_action('wp_enqueue_scripts', function () {
         'useGA4'         => $use_ga4  ? 'true' : 'false',
         'ga4Id'          => esc_js($ga4_id),
         'cookieExists'      => isset($_COOKIE['smart_consent']) ? 'true' : 'false',
-        'toolbarSelector'   => get_option('smart_trigger_toolbar_selector', ''),
+        'hideTrigger'       => get_option('smart_hide_trigger', '0') === '1' ? 'true' : 'false',
     ]);
 });
 
@@ -197,3 +197,15 @@ add_action('wp_enqueue_scripts', function () {
 add_action('woocommerce_login', function () {
     setcookie('woocommerce_just_logged_in', '1', time() + 60, COOKIEPATH, COOKIE_DOMAIN);
 }, 10, 2);
+
+
+// Shortcode [rabbit_consent_trigger] — botón/enlace para abrir el banner desde Elementor
+add_shortcode('rabbit_consent_trigger', function ($atts) {
+    $atts = shortcode_atts([
+        'text'  => 'Gestionar cookies',
+        'class' => '',
+    ], $atts);
+    $class = esc_attr($atts['class']);
+    $text  = esc_html($atts['text']);
+    return '<a href="#open-consent-banner" class="scp-open-link ' . $class . '">' . $text . '</a>';
+});

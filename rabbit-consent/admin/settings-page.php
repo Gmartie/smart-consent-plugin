@@ -546,7 +546,7 @@ add_action('admin_init', function () {
         'smart_trigger_hover_icon_color',
         'smart_banner_icon',
         'smart_banner_icon_custom_url',
-        'smart_trigger_toolbar_selector',
+        'smart_hide_trigger',
     ];
     foreach ($options as $opt) {
         register_setting('smart_consent_group', $opt);
@@ -811,11 +811,26 @@ add_action('admin_init', function () {
     );
 
     add_settings_field(
-        'smart_trigger_toolbar_selector', 'Integrar en barra de herramientas existente',
+        'smart_hide_trigger', 'Ocultar botón flotante &amp; usar enlace externo',
         function () {
-            $value = get_option('smart_trigger_toolbar_selector', '');
-            echo "<input type='text' name='smart_trigger_toolbar_selector' value='" . esc_attr($value) . "' class='regular-text' placeholder='Ej: .site-header nav, #navbar, header .menu'>";
-            echo "<p class='description'>Selector CSS del elemento donde insertar el botón. Si se rellena, el botón deja de ser flotante y se añade dentro del elemento indicado. Deja vacío para usar el modo flotante habitual.<br><strong>Ejemplos comunes:</strong> <code>.site-header .nav-menu</code>, <code>#primary-menu</code>, <code>header nav</code>, <code>.wp-block-navigation__container</code></p>";
+            $checked = get_option('smart_hide_trigger', '0') === '1' ? 'checked' : '';
+            ?>
+            <label>
+                <input type='checkbox' name='smart_hide_trigger' value='1' <?php echo $checked; ?>>
+                Ocultar el botón flotante del plugin
+            </label>
+            <p class='description' style='margin-top:10px;'>
+                Con esta opción activa, el botón flotante desaparece. Puedes abrir el banner desde <strong>cualquier elemento de Elementor</strong>.<br><br>
+                Añade este enlace a cualquier elemento de Elementor (icono, botón, imagen…) para abrir el banner:<br>
+                <code style='display:inline-block;background:#f6f7f7;border:1px solid #ddd;padding:6px 12px;margin:6px 0;border-radius:4px;'>#open-consent-banner</code><br><br>
+
+                También puedes usar un shortcode en cualquier bloque de texto:<br>
+                <code style='display:inline-block;background:#f6f7f7;border:1px solid #ddd;padding:6px 12px;margin:6px 0;border-radius:4px;'>[rabbit_consent_trigger text="Gestionar cookies"]</code><br><br>
+
+                O directamente en HTML:<br>
+                <code style='display:inline-block;background:#f6f7f7;border:1px solid #ddd;padding:6px 12px;margin:6px 0;border-radius:4px;'>&lt;a href="#open-consent-banner"&gt;Gestionar cookies&lt;/a&gt;</code>
+            </p>
+            <?php
         },
         'smart-consent', 'smart_banner_design_section'
     );

@@ -36,6 +36,13 @@ function closeBanner(banner) {
     if (banner) banner.classList.remove('scp-visible');
 }
 
+// Función global para abrir el banner desde cualquier elemento externo
+// Úsala en Elementor con: onclick="window.openConsentBanner()"
+window.openConsentBanner = function () {
+    var banner = document.getElementById('scp-consent-banner');
+    openBanner(banner);
+};
+
 document.addEventListener('DOMContentLoaded', function () {
 
     var banner    = document.getElementById('scp-consent-banner');
@@ -43,20 +50,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var acceptBtn = document.getElementById('accept-cookies');
     var rejectBtn = document.getElementById('reject-cookies');
 
-    // Integrar botón en barra de herramientas si hay selector configurado
-    if (smartSettings.toolbarSelector && smartSettings.toolbarSelector.trim() !== '') {
-        var toolbarEl = document.querySelector(smartSettings.toolbarSelector.trim());
-        if (toolbarEl && trigger) {
-            trigger.classList.remove('scp-pos-left', 'scp-pos-right');
-            trigger.style.position = 'static';
-            trigger.style.bottom   = 'auto';
-            trigger.style.left     = 'auto';
-            trigger.style.right    = 'auto';
-            toolbarEl.appendChild(trigger);
-            if (smartSettings.debug) console.log('[SmartConsent] Botón integrado en:', smartSettings.toolbarSelector);
-        } else if (smartSettings.debug) {
-            console.warn('[SmartConsent] Selector de toolbar no encontrado:', smartSettings.toolbarSelector);
-        }
+    // Ocultar el botón flotante si está configurado
+    if (smartSettings.hideTrigger === 'true' && trigger) {
+        trigger.style.display = 'none';
+        if (smartSettings.debug) console.log('[SmartConsent] Botón flotante oculto. Usa window.openConsentBanner() en tus elementos de Elementor.');
     }
 
     // Banner siempre cerrado al cargar — solo se abre con el botón
@@ -118,3 +115,30 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+
+// Listener global: cualquier elemento con clase "scp-open-banner" abre el banner al hacer clic
+document.addEventListener('click', function (e) {
+    var el = e.target.closest('.scp-open-banner');
+    if (el) {
+        e.preventDefault();
+        window.openConsentBanner();
+    }
+});
+
+
+// Detectar clic en cualquier enlace con href="#open-consent-banner"
+document.addEventListener('click', function (e) {
+    var el = e.target.closest('a[href="#open-consent-banner"]');
+    if (el) {
+        e.preventDefault();
+        window.openConsentBanner();
+    }
+});
+
+// Detectar si la URL tiene #open-consent-banner al cargar
+if (window.location.hash === '#open-consent-banner') {
+    window.addEventListener('load', function () {
+        window.openConsentBanner();
+    });
+}
